@@ -26,6 +26,8 @@
   https://stitch.withgoogle.com/projects/1023403870026049848
 5. Remix包庆涵的修改，验证交替协作的版本控制逻辑
   https://stitch.withgoogle.com/projects/16801801122367322583
+6. 4.1 完成问卷第四和第五板块，保证了所有界面手机端底栏的一致性，优化了诸多细节
+  https://stitch.withgoogle.com/projects/1023403870026049848
 
 
 
@@ -52,7 +54,7 @@ AI几乎不依赖我们写任何一行代码，所以我们只需要设定基本
 visio或者PPT都能用于此类图的绘制，但是考虑到文字流在交给AI处理时更便利，也可以尝试使用mermaid。
 
 ## 页面流程图
-
+### Version 1
 flowchart TD
     Start([用户进入网站]) --> Home[首页/落地页]
     Home -->|点击登录| Login[登录页]
@@ -93,6 +95,64 @@ flowchart TD
     FailReport -->|返回主页面| Waiting
     
     Profile -->|编辑问卷| CoreQuestion
+    Profile -->|修改账号安全| SecuritySettings[安全设置页]
+    
+    Report --> AdminReview[管理员后台]
+    AdminReview -->|确认违规| Ban[永久封禁]
+
+### Version 2
+flowchart TD
+    Start([用户进入网站]) --> Home[首页]
+    Home -->|开启我的灵魂盲盒| IfLogin{是否登录}
+    
+    IfLogin -->|已登录| IfQuestion{是否完成问卷}
+    IfLogin -->|未登录| IfRegister{是否注册}
+    
+    IfRegister -->|已注册| Login[登录页]
+    IfRegister -->|未注册| EmailVerify[身份认证页]
+    
+    Login --> |填写邮箱密码| IfSuccess{是否登录成功}
+    
+    IfSuccess -->|登录成功| IfQuestion{是否完成问卷}
+    IfSuccess -->|密码错误| Login
+    
+    IfQuestion -->|已完成问卷| Waiting[匹配等待页]
+    IfQuestion -->|未完成问卷| CoreQuestion[核心问卷页]
+    
+    EmailVerify[身份认证页] --> IfVerify{是否是本校用户}
+    
+    IfVerify -->|是，发送验证码| Register[注册页]
+    IfVerify -->|否| EmailVerify[身份认证页]
+    
+    Register[注册页] -->|完成注册| BindInfo[绑定微信/手机号]
+    BindInfo -->|完成绑定| CoreQuestion[核心问卷页]
+    
+    Home -->|问卷按钮| IfQuestion2{是否完成问卷}
+    Home -->|头像按钮| Profile[个人资料页]
+    Home -->|铃铛按钮| ChatRoom[72小时匿名聊天室]
+    
+    IfQuestion2 -->|已完成问卷| Waiting[匹配等待页]
+    IfQuestion2 -->|未完成问卷| CoreQuestion[核心问卷页]
+    
+    CoreQuestion -->|提交| Waiting[匹配等待页]
+    
+    Waiting -->|每周三12:00定时触发| MatchingEngine[后端匹配引擎]
+    MatchingEngine -->|匹配完成| ResultPage{匹配结果页}
+    
+    ResultPage -->|匹配成功| SuccessReport[匹配成功页]
+    ResultPage -->|匹配失败| FailReport[宁缺勿滥页]
+    
+    SuccessReport --> |点击拆开| MatchReport[契合度报告页]
+    
+    MatchReport -->|进入聊天室| ChatRoom[72小时匿名聊天室]
+    
+    ChatRoom -->|72小时后| RoomExpire[聊天室关闭]
+    ChatRoom -->|举报/屏蔽| Report[举报流程]
+    
+    FailReport -->|更新问卷| CoreQuestion[核心问卷页]
+    FailReport -->|参加下次匹配| Waiting[匹配等待页]
+    
+    Profile -->|编辑问卷| CoreQuestion[核心问卷页]
     Profile -->|修改账号安全| SecuritySettings[安全设置页]
     
     Report --> AdminReview[管理员后台]
