@@ -16,10 +16,19 @@
 匿名聊天
 
 ## UI设计
-https://stitch.withgoogle.com/projects/16779102031859444659
+1. 3.28确定了网站的风格的基本布局
+  https://stitch.withgoogle.com/projects/16779102031859444659
+2. 3.28 保证了顶栏的一致性，初步优化了首页文案，初步生成了问卷部分（还需要很多调教）
+  https://stitch.withgoogle.com/projects/1023403870026049848
+3. 3.30 完成了问卷第一模块，增添了注册界面和登陆界面，对等待匹配界面做了优化
+  https://stitch.withgoogle.com/projects/1023403870026049848
+4. 3.31 完成问卷第二板块和第三板块，修复了首页按钮遮挡问题
+  https://stitch.withgoogle.com/projects/1023403870026049848
 
 
 ### 注册功能
+- 关于登陆界面如何接入微信的教程
+  https://zhuanlan.zhihu.com/p/347683336
 
 ## bingo灵感收集
 
