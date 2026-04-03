@@ -1,0 +1,277 @@
+<!DOCTYPE html><html class="light" lang="zh-CN" style="margin: 0; padding: 0;"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "error": "#ba1a1a",
+              "surface": "#fdf9f3",
+              "inverse-primary": "#ffb783",
+              "surface-dim": "#dddad4",
+              "on-tertiary-fixed-variant": "#5a4300",
+              "outline": "#887365",
+              "on-secondary-fixed-variant": "#7c2e00",
+              "outline-variant": "#dbc2b2",
+              "secondary-container": "#fc7127",
+              "primary-fixed-dim": "#ffb783",
+              "on-secondary": "#ffffff",
+              "on-primary-container": "#602e00",
+              "error-container": "#ffdad6",
+              "secondary-fixed-dim": "#ffb595",
+              "on-primary": "#ffffff",
+              "on-surface": "#1c1c18",
+              "on-tertiary-fixed": "#251a00",
+              "tertiary": "#785a00",
+              "background": "#fdf9f3",
+              "on-secondary-container": "#5c2000",
+              "on-error-container": "#93000a",
+              "tertiary-fixed-dim": "#f8be00",
+              "primary-container": "#f68a2f",
+              "on-surface-variant": "#554337",
+              "on-primary-fixed-variant": "#713700",
+              "surface-container-lowest": "#ffffff",
+              "surface-container-low": "#f7f3ed",
+              "surface-container-high": "#ebe8e2",
+              "surface-container": "#f1ede7",
+              "primary": "#944a00",
+              "inverse-surface": "#31302d",
+              "surface-tint": "#944a00",
+              "surface-variant": "#e6e2dc",
+              "tertiary-container": "#d09e00",
+              "inverse-on-surface": "#f4f0ea",
+              "primary-fixed": "#ffdcc5",
+              "secondary": "#a23f00",
+              "secondary-fixed": "#ffdbcd",
+              "surface-container-highest": "#e6e2dc",
+              "tertiary-fixed": "#ffdf9a",
+              "on-error": "#ffffff",
+              "on-tertiary-container": "#4c3800",
+              "on-tertiary": "#ffffff",
+              "on-secondary-fixed": "#351000",
+              "on-primary-fixed": "#301400",
+              "surface-bright": "#fdf9f3",
+              "on-background": "#1c1c18"
+            },
+            fontFamily: {
+              "headline": ["Manrope", "sans-serif"],
+              "body": ["Manrope", "sans-serif"],
+              "label": ["Manrope", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "1rem", "2xl": "1.5rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Manrope', sans-serif;
+            background-color: #fdf9f3;
+            color: #1c1c18;
+            -webkit-font-smoothing: antialiased;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(24px) saturate(160%);
+            -webkit-backdrop-filter: blur(24px) saturate(160%);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+        .orange-glow {
+            background: linear-gradient(135deg, #a23f00 0%, #f68a2f 50%, #fbbf24 100%);
+        }
+        .amber-gradient {
+            background: linear-gradient(135deg, #944a00 0%, #f68a2f 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .hero-gradient {
+            background: radial-gradient(circle at 50% 0%, rgba(246, 138, 47, 0.2) 0%, rgba(253, 249, 243, 0) 50%);
+            min-height: 100vh;
+        }
+        .deep-glow-shadow {
+            box-shadow: 
+                0 10px 15px -3px rgba(148, 74, 0, 0.2), 
+                0 4px 6px -2px rgba(148, 74, 0, 0.1),
+                0 20px 40px -10px rgba(148, 74, 0, 0.4),
+                inset 0 1px 1px rgba(255, 255, 255, 0.3);
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(-50%); }
+            50% { transform: translateY(-8px) translateX(-50%); }
+        }
+        .animate-float-fixed {
+            animation: float 4s ease-in-out infinite;
+        }
+        .bento-card-stack {
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+    </style>
+</head>
+<body class="selection:bg-primary-fixed selection:text-primary min-h-screen relative overflow-x-hidden bg-[#fdf9f3]">
+<!-- Hero Background Gradient - Extends to top of page -->
+<div class="fixed top-0 left-0 right-0 h-[60vh] hero-gradient -z-10 pointer-events-none"></div>
+<!-- Top Navigation Bar -->
+<nav class="sticky top-4 mx-auto w-[92%] max-w-7xl rounded-2xl bg-white/70 dark:bg-stone-900/60 backdrop-blur-3xl outline outline-1 outline-orange-200/20 dark:outline-stone-700/20 shadow-[0_4px_24px_rgba(28,28,24,0.04)] flex justify-between items-center px-5 md:px-8 py-3.5 z-50">
+<div class="text-xl md:text-2xl font-black text-orange-700 dark:text-orange-500 tracking-tighter" style=""><a href="index.html" class="flex items-center gap-1">🍊意配</a></div>
+<div class="hidden md:flex gap-8 items-center font-manrope font-medium text-sm tracking-tight text-stone-600 dark:text-stone-400">
+<a class="text-orange-700 dark:text-orange-400 font-bold border-b-2 border-orange-500 pb-1" href="index.html" style="">首页</a>
+<a class="hover:text-orange-600 transition-colors" href="CoreQuestion_module1.html" style="">问卷</a>
+<a class="hover:text-orange-600 transition-colors" href="Waiting.html" style="">我的匹配</a>
+</div>
+<div class="flex items-center gap-2 md:gap-4 text-orange-600 dark:text-orange-400">
+<a href="ChatRoom.html" class="p-2 hover:bg-orange-50/50 dark:hover:bg-stone-800/50 rounded-lg transition-all active:scale-95" style="">
+<span class="material-symbols-outlined text-2xl" style="">notifications</span>
+</a>
+<a href="Profile.html" class="p-2 hover:bg-orange-50/50 dark:hover:bg-stone-800/50 rounded-lg transition-all active:scale-95" style="">
+<span class="material-symbols-outlined text-2xl" style="">account_circle</span>
+</a>
+</div>
+</nav>
+<main class="relative z-10 pt-28 md:pt-28 pb-44">
+<!-- Hero Section -->
+<section class="max-w-7xl mx-auto px-6 text-center mb-16">
+<div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-orange-50 text-orange-700 text-[10px] md:text-xs font-bold mb-6 md:mb-8 outline outline-1 outline-orange-200/30 shadow-sm" style="">
+<span class="material-symbols-outlined text-[14px]" style="">stars</span>
+                HEU 专属社交实验
+            </div>
+<h1 class="text-3xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-on-surface mb-6 md:mb-8 leading-[1.2] md:leading-[1.1] font-headline amber-gradient" style="">
+                也许，你们已经在 HEU <br>擦肩而过 17 次
+            </h1>
+<p class="text-base md:text-xl text-on-surface-variant max-w-3xl mx-auto leading-relaxed font-medium px-4" style="">
+                在数据噪声中，算法为你观测到了那一颗唯一共鸣的星。<br class="hidden md:block">这不是偶然，是被计算出的重逢。
+            </p>
+<!-- Dynamic Status Indicators -->
+<div class="mt-10 md:mt-12 flex flex-col items-center gap-4 text-orange-700/60 font-medium text-xs md:text-sm">
+<div class="flex items-center gap-3">
+<span class="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse"></span>
+<span class="tracking-wide" style="">正在检索附近的灵魂信号...</span>
+</div>
+<div class="flex items-center gap-3 opacity-60">
+<span class="w-1.5 h-1.5 rounded-full bg-stone-400"></span>
+<span class="tracking-wide" style="">排除随机干扰，深度特征对齐中...</span>
+</div>
+<p class="text-[10px] md:text-xs text-stone-400 italic mt-2" style="">“在这座校园里，有些相遇本该发生。”</p>
+</div>
+</section>
+<!-- Transition Section -->
+<section class="max-w-5xl mx-auto px-6 mb-12 md:mb-16 text-center">
+<div class="h-px w-16 md:w-24 bg-gradient-to-r from-transparent via-orange-200 to-transparent mx-auto mb-10 md:mb-12"></div>
+<h2 class="text-2xl md:text-3xl font-bold text-on-surface mb-4" style="">在同一个时空，刚好同频。</h2>
+<p class="text-sm md:text-base text-on-surface-variant max-w-2xl mx-auto leading-relaxed px-4" style="">
+                也许在 11 号楼，或是图书馆，你们曾共享过同一束光。现在，算法让你们正式相识。
+            </p>
+</section>
+<!-- Bento Grid Section Optimized for Mobile -->
+<section class="max-w-7xl mx-auto px-6 space-y-6 md:space-y-8">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+<!-- Card: 时间的信差 -->
+<div class="glass-panel p-6 md:p-10 rounded-3xl flex flex-col gap-6 group hover:bg-white/60 transition-all duration-500 shadow-lg shadow-orange-900/[0.03]">
+<div class="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-orange-100 flex items-center justify-center text-orange-700 group-hover:scale-110 transition-transform duration-500">
+<span class="material-symbols-outlined text-2xl md:text-3xl" style="">inventory_2</span>
+</div>
+<div>
+<h3 class="text-xl md:text-2xl font-bold text-on-surface mb-2 md:mb-3" style="">时间的信差</h3>
+<p class="text-sm md:text-base text-on-surface-variant leading-relaxed" style="">告别速食。每周三 12:00，一份跨越数字荒原的信件，只为值得等待的人开启。</p>
+</div>
+<div class="mt-auto pt-2 overflow-hidden rounded-xl h-32 md:h-40">
+<img alt="minimalist envelope" class="w-full h-full object-cover rounded-xl transition-transform duration-700 group-hover:scale-105" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCST2FrGWvQwPDPWbj1SOizAXtM8raEpZ1BH-stOcJAGC3o7L4hxAbWqDbWiHSAgwIw8sVtOlvNpL48tiESysqawkaljJdJLPRwHNTgdzirHq3RlSOhUfaIaFOxhbJ9dK06QxYX1ifn4ZuQhnRhp1YYHaIjg8ACQ28lslDM5opHBf9GbWxHHBIvqsPQ2d7tJ5c2Myf7LQlHx-lRGcX0XlDE0jRY3aZZssyiAWuhpm45BI5JlER4OzTH6pY_GQWdbZKVK1QKMe1ev6uB" style="">
+</div>
+</div>
+<!-- Card: 同频的避风港 -->
+<div class="glass-panel p-6 md:p-10 rounded-3xl flex flex-col gap-6 group hover:bg-white/60 transition-all duration-500 shadow-lg shadow-orange-900/[0.03]">
+<div class="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-orange-100 flex items-center justify-center text-orange-700 group-hover:scale-110 transition-transform duration-500">
+<span class="material-symbols-outlined text-2xl md:text-3xl" style="">verified_user</span>
+</div>
+<div>
+<h3 class="text-xl md:text-2xl font-bold text-on-surface mb-2 md:mb-3" style="">同频的避风港</h3>
+<p class="text-sm md:text-base text-on-surface-variant leading-relaxed" style="">仅限 HEU 实名在校生。在这个半封闭的实验场里，只有最纯粹的学子情谊与工程大脑的碰撞。</p>
+</div>
+<div class="mt-auto pt-4 flex -space-x-3 md:-space-x-4">
+<div class="w-12 h-12 md:w-16 md:h-16 rounded-full border-[3px] md:border-4 border-surface overflow-hidden shadow-sm">
+<img alt="student 1" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAEd78ikM7Dk0t8jsDZQaD_G_XFj2Jt6CTt29F4y_4gvRj52G3CywFdIxbaDfIGTopqscmmlSJyjHqE-ix-JCOH_83_a05q6JchQntnmd4FtDTMSqu1zEXhgckspOZB2tFfcLUCQs8pSMB5lmRkUq9ImyY8RJUTBNLOYoEQ_W50tHFcZc1u4iUMAyKrCmrCGc6W_jDrPoTgjnWjIwOPjipMnUjEGiCDlaR2mlpAnk5uk9WulKpyG8y0UEW9wKbf9aeh8eY3SUDkgTT9" style="">
+</div>
+<div class="w-12 h-12 md:w-16 md:h-16 rounded-full border-[3px] md:border-4 border-surface overflow-hidden shadow-sm">
+<img alt="student 2" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC3_mniPaqOUtqGhssuff9Z38x4GkUQlLhQjRR_BkatVnxQvGTveXApRyZsT27k749RDy_xkuZCsicNspWS4l3kkOB_pnM-B6y6HsrvfHDZMVUaS5MPlNPebmgCxlAyS7O4oFIuOqHksQqIVzoTdN9N-YQ9HWYmKpHd3KEexdSaNsj9m4LZ7BEsFFOY9E0Sfmecd5O3BSOBWdpbo43hqrqPnA2CecNlUDA-Tur4JF2OyCj6YsgiQ-7nUgmxeLTibM-3qXDi8UnSEfBr" style="">
+</div>
+<div class="w-12 h-12 md:w-16 md:h-16 rounded-full border-[3px] md:border-4 border-surface flex items-center justify-center bg-orange-500 text-white font-bold text-[10px] md:text-xs shadow-sm" style="">+12k</div>
+</div>
+</div>
+</div>
+<!-- Card: 灵魂的刻度 - Full Width Bottom Row -->
+<div class="glass-panel p-6 md:p-10 rounded-3xl flex flex-col md:flex-row gap-6 md:gap-8 items-center relative overflow-hidden group shadow-lg shadow-orange-900/[0.03]">
+<div class="absolute top-0 right-0 w-48 h-48 md:w-64 md:h-64 bg-orange-400/10 blur-[80px] md:blur-[100px] rounded-full -translate-y-1/2 translate-x-1/2 -z-10"></div>
+<div class="flex-shrink-0 w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-orange-200 flex items-center justify-center text-orange-800">
+<span class="material-symbols-outlined text-2xl md:text-3xl" style="">analytics</span>
+</div>
+<div class="flex-grow text-center md:text-left">
+<h3 class="text-xl md:text-2xl font-bold text-on-surface mb-2" style="">灵魂的刻度</h3>
+<p class="text-sm md:text-base text-on-surface-variant leading-relaxed" style="">32 个维度的心理建模，12 项价值观深度对齐。我们用最理性的逻辑，证明最感性的默契。</p>
+</div>
+<div class="w-full md:w-96 bg-white/60 backdrop-blur-md rounded-2xl p-5 md:p-8 outline outline-1 outline-orange-200/30 shadow-sm">
+<div class="flex items-end justify-between mb-4 md:mb-6">
+<span class="text-[10px] md:text-xs font-bold text-orange-800/60 tracking-wider uppercase" style="">Match Factor契合指数</span>
+<span class="text-3xl md:text-4xl font-black text-orange-700 leading-none" style="">98.2%</span>
+</div>
+<div class="space-y-3 md:space-y-4">
+<div class="h-2 w-full bg-stone-200/50 rounded-full overflow-hidden">
+<div class="h-full orange-glow w-[98.2%] rounded-full transition-all duration-1000 ease-out"></div>
+</div>
+<div class="flex justify-between text-[9px] md:text-[11px] font-bold text-orange-700/40">
+<span class="" style="">NEURAL SYNC</span>
+<span class="" style="">PEAK ALIGNMENT</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Decoration Elements -->
+<div class="absolute top-[20%] -left-32 md:-left-64 w-[300px] md:w-[600px] h-[300px] md:h-[600px] bg-orange-200/20 blur-[80px] md:blur-[120px] rounded-full -z-10"></div>
+<div class="absolute top-[60%] -right-32 md:-right-64 w-[250px] md:w-[500px] h-[250px] md:h-[500px] bg-primary/10 blur-[70px] md:blur-[100px] rounded-full -z-10"></div>
+</main>
+<!-- Footer Area with Optimized Floating Button -->
+<div class="relative py-12 flex flex-col items-center">
+<p class="text-on-surface-variant font-medium text-sm md:text-lg italic text-center px-10 mb-8 max-w-lg" style="">
+            “算法是冷的，但它是为了寻找热的灵魂。”
+        </p>
+<!-- Centered Fixed CTA Button with Multi-layered Shadows -->
+<div class="fixed bottom-24 md:bottom-10 left-1/2 -translate-x-1/2 z-[100] w-[90%] max-w-sm flex justify-center pointer-events-none">
+<button onclick="window.location.href='Login.html'" class="pointer-events-auto orange-glow text-white w-full py-5 rounded-full flex items-center justify-center gap-3 font-extrabold text-lg md:text-xl deep-glow-shadow transition-all duration-300 hover:scale-105 active:scale-95 group hover:-translate-y-1" style="">
+<span class="material-symbols-outlined text-2xl md:text-3xl group-hover:scale-110 transition-transform" style="font-variation-settings: &quot;FILL&quot; 1;">favorite</span>
+<span class="" style="">开启我的灵魂盲盒</span>
+</button>
+</div>
+<footer class="mt-8 text-center pb-32 md:pb-12">
+<p class="text-on-surface-variant/40 text-[10px] md:text-sm" style="">© 2024 🍊意配 | HEU 校园专属社交实验</p>
+</footer>
+</div>
+<!-- Mobile Navigation (Bottom Nav) -->
+<div class="md:hidden fixed bottom-4 left-1/2 -translate-x-1/2 w-[92%] z-[110]">
+<nav class="glass-panel py-3 px-6 rounded-3xl shadow-2xl flex justify-between items-center backdrop-blur-3xl border-orange-100/30">
+<a class="flex flex-col items-center gap-1 text-orange-700" href="index.html" style="">
+<span class="material-symbols-outlined text-[24px]" style="font-variation-settings: &quot;FILL&quot; 1;">home</span>
+<span class="text-[10px] font-bold" style="">首页</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-on-surface-variant/60 hover:text-orange-600 transition-colors" href="CoreQuestion_module1.html" style="">
+<span class="material-symbols-outlined text-[24px]" style="">quiz</span>
+<span class="text-[10px] font-bold" style="">问卷</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-on-surface-variant/60 hover:text-orange-600 transition-colors" href="Waiting.html" style="">
+<span class="material-symbols-outlined text-[24px]" style="">person_search</span>
+<span class="text-[10px] font-bold" style="">我的匹配</span>
+</a>
+</nav>
+</div>
+</body></html>
