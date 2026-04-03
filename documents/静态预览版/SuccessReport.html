@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>🍊意配 - 缘分已开启</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-primary-fixed": "#301400",
+                        "inverse-surface": "#31302d",
+                        "primary": "#944a00",
+                        "on-secondary-fixed-variant": "#7c2e00",
+                        "tertiary-fixed-dim": "#f8be00",
+                        "secondary-container": "#fc7127",
+                        "surface-container-high": "#ebe8e2",
+                        "secondary-fixed-dim": "#ffb595",
+                        "primary-container": "#f68a2f",
+                        "on-primary-container": "#602e00",
+                        "tertiary": "#785a00",
+                        "on-error": "#ffffff",
+                        "background": "#fdf9f3",
+                        "secondary-fixed": "#ffdbcd",
+                        "on-tertiary-fixed": "#251a00",
+                        "on-error-container": "#93000a",
+                        "tertiary-fixed": "#ffdf9a",
+                        "on-surface": "#1c1c18",
+                        "surface-bright": "#fdf9f3",
+                        "primary-fixed": "#ffdcc5",
+                        "surface": "#fdf9f3",
+                        "on-secondary-container": "#5c2000",
+                        "error": "#ba1a1a",
+                        "surface-container-low": "#f7f3ed",
+                        "secondary": "#a23f00",
+                        "outline-variant": "#dbc2b2",
+                        "outline": "#887365",
+                        "on-tertiary-fixed-variant": "#5a4300",
+                        "on-surface-variant": "#554337",
+                        "tertiary-container": "#d09e00",
+                        "on-primary": "#ffffff",
+                        "primary-fixed-dim": "#ffb783",
+                        "inverse-primary": "#ffb783",
+                        "surface-container": "#f1ede7",
+                        "on-primary-fixed-variant": "#713700",
+                        "surface-dim": "#dddad4",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary-container": "#4c3800",
+                        "on-background": "#1c1c18",
+                        "surface-tint": "#944a00",
+                        "inverse-on-surface": "#f4f0ea",
+                        "on-tertiary": "#ffffff",
+                        "surface-variant": "#e6e2dc",
+                        "surface-container-lowest": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "surface-container-highest": "#e6e2dc",
+                        "on-secondary-fixed": "#351000"
+                    },
+                    fontFamily: {
+                        "headline": ["Manrope"],
+                        "body": ["Manrope"],
+                        "label": ["Manrope"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "1.5rem", "2xl": "2rem", "3xl": "4rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .warm-glow {
+            background: radial-gradient(circle at 50% 50%, rgba(246, 138, 47, 0.15) 0%, rgba(253, 249, 243, 0) 70%);
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(24px) saturate(160%);
+            -webkit-backdrop-filter: blur(24px) saturate(160%);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+        .letter-shadow {
+            box-shadow: 0 32px 64px -16px rgba(148, 74, 0, 0.1);
+        }
+        .vertical-text {
+            writing-mode: vertical-rl;
+        }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface selection:bg-secondary-fixed min-h-screen overflow-x-hidden flex flex-col">
+<!-- Top Navigation Bar -->
+<nav class="sticky top-4 mx-auto w-[95%] max-w-7xl rounded-2xl bg-white/60 dark:bg-stone-900/60 backdrop-blur-3xl outline outline-1 outline-orange-200/15 dark:outline-stone-700/20 shadow-[0_8px_32px_rgba(28,28,24,0.06)] flex justify-between items-center px-8 py-4 z-50">
+<div class="text-2xl font-black text-orange-700 dark:text-orange-500 tracking-tighter"><a href="index.html" class="flex items-center gap-1">🍊意配</a></div>
+<div class="hidden md:flex gap-8 items-center font-manrope font-medium text-sm tracking-tight text-stone-600 dark:text-stone-400">
+<a class="hover:text-orange-600 transition-colors" href="index.html">首页</a>
+<a class="hover:text-orange-600 transition-colors" href="CoreQuestion_module1.html">问卷</a>
+<a class="text-orange-700 dark:text-orange-400 font-bold border-b-2 border-orange-500 pb-1" href="Waiting.html">我的匹配</a>
+</div>
+<div class="flex items-center gap-4 text-orange-600 dark:text-orange-400">
+<a href="ChatRoom.html" class="p-2 hover:bg-orange-50/50 dark:hover:bg-stone-800/50 rounded-lg transition-all active:scale-95 duration-200 ease-out">
+<span class="material-symbols-outlined">notifications</span>
+</a>
+<a href="Profile.html" class="p-2 hover:bg-orange-50/50 dark:hover:bg-stone-800/50 rounded-lg transition-all active:scale-95 duration-200 ease-out">
+<span class="material-symbols-outlined">account_circle</span>
+</a>
+</div>
+</nav>
+<!-- Main Content -->
+<main class="flex-grow flex flex-col items-center justify-center relative px-6 w-full max-w-4xl mx-auto py-10">
+<!-- Background Ambient Glows -->
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full -z-10 overflow-hidden pointer-events-none">
+<div class="absolute top-[10%] left-[20%] w-[400px] h-[400px] bg-primary-container/10 rounded-full blur-[60px]"></div>
+<div class="absolute bottom-[10%] right-[20%] w-[350px] h-[350px] bg-tertiary-container/10 rounded-full blur-[60px]"></div>
+</div>
+<!-- Central Card Container -->
+<div class="relative w-full transition-transform duration-500 hover:scale-[1.01]">
+<!-- Glassmorphic Card (Width synced with SCREEN_32) -->
+<div class="glass-card relative w-full rounded-[4rem] p-12 md:p-20 shadow-[0_32px_64px_-16px_rgba(148,74,0,0.1)] flex flex-col items-center text-center overflow-hidden outline outline-1 outline-white/20">
+<!-- Content -->
+<div class="flex flex-col items-center z-10 w-full">
+<!-- Icon Circle (Refined) -->
+<div class="relative w-32 h-32 mb-8 flex items-center justify-center">
+<!-- Inner Glow from SCREEN_30 -->
+<div class="absolute inset-0 bg-primary/15 rounded-full blur-xl animate-pulse"></div>
+<!-- Main Icon -->
+<div class="relative z-10 flex flex-col items-center">
+<div class="relative group transition-all duration-700">
+<!-- Main Envelope Icon -->
+<span class="material-symbols-outlined text-7xl text-primary leading-none" style="font-variation-settings: 'FILL' 0, 'wght' 100;">
+        mail
+    </span>
+<!-- Heart Detail on Flap Area -->
+<div class="absolute top-[34%] left-1/2 -translate-x-1/2 z-20 flex items-center justify-center">
+<div class="w-[18px] h-[18px] bg-primary rounded-full flex items-center justify-center shadow-[0_1px_3px_rgba(0,0,0,0.1),inset_0_-1px_1px_rgba(0,0,0,0.1)] border border-white/20 group-hover:scale-105 transition-transform duration-500">
+<span class="material-symbols-outlined text-white text-[11px]" style="font-variation-settings: 'FILL' 1;">favorite</span>
+</div>
+</div>
+<!-- Subtle glow behind the heart -->
+</div>
+</div>
+<!-- Decorative Magnetic Rings from SCREEN_30 -->
+<div class="absolute w-44 h-44 border border-primary/10 rounded-full"></div>
+<div class="absolute w-56 h-56 border border-primary/5 rounded-full"></div></div>
+<div class="space-y-4 mb-8"><span class="block text-primary font-bold tracking-[0.2em] text-xs uppercase opacity-80 mb-4">Soul Message</span>
+<h1 class="text-4xl md:text-5xl font-extrabold text-on-surface tracking-tight mb-6">你有一份灵魂来信</h1>
+<p class="text-lg md:text-xl text-on-surface-variant max-w-md leading-relaxed mb-12">请查收这份专属的缘分</p></div>
+<!-- Decorative Seal -->
+<!-- Button (Refined Ratio) -->
+<button onclick="window.location.href='MatchReport.html'" class="px-10 py-5 bg-gradient-to-r from-primary to-primary-container text-white font-bold text-lg rounded-full shadow-lg hover:shadow-primary/30 hover:scale-[1.02] active:scale-95 transition-all mb-16 flex items-center gap-4">
+<span>点击拆开</span>
+<span class="material-symbols-outlined text-xl">keyboard_arrow_right</span>
+</button>
+</div>
+</div>
+<!-- Scroll Guide -->
+<div class="absolute -bottom-24 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3">
+<div class="flex items-center gap-2 text-on-surface-variant/40 animate-bounce">
+<span class="material-symbols-outlined text-sm">keyboard_arrow_down</span>
+<span class="text-[10px] font-bold tracking-[0.2em] uppercase">Tap to reveal</span>
+<span class="material-symbols-outlined text-sm">keyboard_arrow_down</span>
+</div>
+</div>
+</div>
+</main>
+<!-- Mobile Navigation (Bottom Nav) - Synchronized with SCREEN_17 -->
+<div class="md:hidden fixed bottom-4 left-1/2 -translate-x-1/2 w-[92%] z-[110]">
+<nav class="glass-panel py-3 px-6 rounded-3xl shadow-2xl flex justify-between items-center backdrop-blur-3xl border-orange-100/30">
+<a class="flex flex-col items-center gap-1 text-on-surface-variant/60 hover:text-orange-600 transition-colors" href="index.html">
+<span class="material-symbols-outlined text-[24px]">home</span>
+<span class="text-[10px] font-bold">首页</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-on-surface-variant/60 hover:text-orange-600 transition-colors" href="CoreQuestion_module1.html">
+<span class="material-symbols-outlined text-[24px]">quiz</span>
+<span class="text-[10px] font-bold">问卷</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-orange-700" href="Waiting.html">
+<span class="material-symbols-outlined text-[24px]" style="font-variation-settings: 'FILL' 1;">person_search</span>
+<span class="text-[10px] font-bold">我的匹配</span>
+</a>
+</nav>
+</div>
+<!-- Side Decoration (Web Only) -->
+<aside class="hidden xl:flex fixed left-12 top-1/2 -translate-y-1/2 flex-col gap-8 opacity-20">
+<div class="w-1 h-24 bg-gradient-to-b from-transparent via-primary to-transparent rounded-full"></div>
+<div class="vertical-text font-headline text-[10px] tracking-[0.5em] text-on-surface-variant uppercase">Crafted for connection</div>
+</aside>
+</body></html>
