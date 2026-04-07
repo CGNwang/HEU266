@@ -22,13 +22,9 @@ const BindInfoPage: React.FC = () => {
       <div className="fixed top-[-10%] right-[-5%] w-[500px] h-[500px] warm-glow rounded-full pointer-events-none" />
       <div className="fixed bottom-[-15%] left-[-10%] w-[600px] h-[600px] warm-glow rounded-full pointer-events-none opacity-60" />
 
-      {/* Top Navigation / Branding */}
-      <div className="absolute top-8 left-1/2 -translate-x-1/2 z-50 pointer-events-none">
-        <div className="text-3xl font-black text-orange-700 tracking-tighter flex items-center gap-2">
-          <span>🍊</span>
-          <span>意配</span>
-        </div>
-      </div>
+      {/* Background Decorative Elements */}
+      <div className="fixed top-[-10%] right-[-5%] w-[500px] h-[500px] warm-glow rounded-full pointer-events-none" />
+      <div className="fixed bottom-[-15%] left-[-10%] w-[600px] h-[600px] warm-glow rounded-full pointer-events-none opacity-60" />
 
       {/* Main Content Area */}
       <main className="w-full max-w-lg px-6 relative z-10 py-24">
