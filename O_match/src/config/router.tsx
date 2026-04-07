@@ -12,6 +12,9 @@ import {
   ChatRoomPage,
   QuestionnairePage,
   ProfilePage,
+  SecurityPage,
+  BindInfoPage,
+  DonatePage,
 } from '@/components/pages';
 
 // 路由配置
@@ -55,6 +58,18 @@ export const router = createBrowserRouter([
       {
         path: 'profile',
         element: <ProfilePage />,
+      },
+      {
+        path: 'security',
+        element: <SecurityPage />,
+      },
+      {
+        path: 'bind-info',
+        element: <BindInfoPage />,
+      },
+      {
+        path: 'donate',
+        element: <DonatePage />,
       },
     ],
   },

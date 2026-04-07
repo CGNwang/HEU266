@@ -115,7 +115,7 @@ const LoginPage: React.FC = () => {
           {/* Bottom Guide */}
           <div className="pt-8 border-t border-orange-100/30 w-full mt-10">
             <p className="text-sm font-medium text-on-surface-variant">
-              还没有账号？<Link to="/register" className="text-secondary font-bold hover:opacity-80 transition-opacity ml-1">立即注册</Link>
+              还没有账号？<Link to="/email-verify" className="text-secondary font-bold hover:opacity-80 transition-opacity ml-1">立即注册</Link>
             </p>
           </div>
         </div>

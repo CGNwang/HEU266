@@ -14,3 +14,6 @@ export { default as QuestionnaireModule2 } from './QuestionnaireModule2';
 export { default as QuestionnaireModule3 } from './QuestionnaireModule3';
 export { default as QuestionnaireModule4 } from './QuestionnaireModule4';
 export { default as QuestionnaireModule5 } from './QuestionnaireModule5';
+export { default as SecurityPage } from './SecurityPage';
+export { default as BindInfoPage } from './BindInfoPage';
+export { default as DonatePage } from './DonatePage';

@@ -354,7 +354,9 @@ const QuestionnaireModule5: React.FC = () => {
               }
 
               // 所有题目已完成，保存问卷并参与匹配
+              const existingData5 = await loadQuestionnaire();
               await saveQuestionnaire({
+                ...existingData5,
                 module5: formData,
               });
 
@@ -373,7 +375,9 @@ const QuestionnaireModule5: React.FC = () => {
           </button>
           <button
             onClick={async () => {
+              const existingData = await loadQuestionnaire();
               await saveQuestionnaire({
+                ...existingData,
                 module5: formData,
               });
               alert('进度已保存！');

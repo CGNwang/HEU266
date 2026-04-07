@@ -59,6 +59,10 @@
     background: linear-gradient(135deg, #944a00 0%, #f68a2f 100%);
   }
 
+  .wechat-gradient {
+    background: linear-gradient(135deg, #07C160 0%, #09D35F 100%);
+  }
+
   .warm-gradient {
     background: linear-gradient(135deg, #f28c38 0%, #ffb783 100%);
   }

@@ -517,10 +517,10 @@ const QuestionnairePage: React.FC = () => {
           </button>
           <button
             onClick={async () => {
-              // 收集所有模块的数据并保存
-              // 注意：这里需要从 store 或其他方式获取其他模块的数据
-              // 简化版本：先保存当前模块数据，后续可扩展为保存全部
+              // 加载已保存的其他模块数据，合并后保存
+              const existingData = await loadQuestionnaire();
               await saveQuestionnaire({
+                ...existingData,
                 module1: formData,
               });
               alert('进度已保存！');

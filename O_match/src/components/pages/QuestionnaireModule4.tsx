@@ -282,7 +282,9 @@ const QuestionnaireModule4: React.FC = () => {
           </button>
           <button
             onClick={async () => {
+              const existingData = await loadQuestionnaire();
               await saveQuestionnaire({
+                ...existingData,
                 module4: formData,
               });
               alert('进度已保存！');
