@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { getMatchingStatus, joinMatching, cancelMatching } from '@/services/matchingService';
 
 const WaitingPage: React.FC = () => {
   const [isJoined, setIsJoined] = useState(false);
   const [loading, setLoading] = useState(true);
+  const countdownRef = useRef<HTMLDivElement>(null);
 
   // 页面加载时获取匹配状态
   useEffect(() => {
@@ -16,6 +17,16 @@ const WaitingPage: React.FC = () => {
     };
     checkStatus();
   }, []);
+
+  // 页面加载时滚动到顶部
+  useEffect(() => {
+    if (!loading) {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    }
+  }, [loading]);
 
   const toggleJoin = async () => {
     if (isJoined) {
@@ -34,14 +45,14 @@ const WaitingPage: React.FC = () => {
   // 如果正在加载，显示 loading 状态
   if (loading) {
     return (
-      <main className="relative pt-32 pb-40 px-6 max-w-4xl mx-auto flex flex-col items-center justify-center min-h-[921px]">
+      <main className="relative pt-8 pb-40 px-6 max-w-4xl mx-auto flex flex-col items-center justify-center min-h-[921px]">
         <div className="text-on-surface-variant">加载中...</div>
       </main>
     );
   }
 
   return (
-    <main className="relative pt-32 pb-40 px-6 max-w-4xl mx-auto flex flex-col items-center justify-center min-h-[921px]">
+    <main className="relative pt-8 pb-40 px-6 max-w-4xl mx-auto flex flex-col items-center justify-center min-h-[921px]">
       {/* Background Ambient Glows */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full -z-10 overflow-hidden pointer-events-none">
         <div className="glow-orb absolute top-[10%] left-[20%] w-[400px] h-[400px] bg-primary-container rounded-full" />
@@ -66,7 +77,7 @@ const WaitingPage: React.FC = () => {
         </div>
 
         {/* Countdown Timer */}
-        <div className="flex flex-col items-center mb-10 md:scale-125 transition-transform duration-500 scale-[0.9] sm:scale-100">
+        <div ref={countdownRef} className="flex flex-col items-center mb-10 md:scale-125 transition-transform duration-500 scale-[0.9] sm:scale-100">
           <div className="bg-orange-50/90 backdrop-blur-md border border-orange-200/60 rounded-[2rem] py-4 shadow-[0_12px_32px_-8px_rgba(242,140,56,0.25)] flex items-center space-x-4 px-4 sm:px-8">
             <span className="material-symbols-outlined text-primary text-2xl" style={{ fontVariationSettings: '"FILL" 1' }}>schedule</span>
             <span className="font-headline font-extrabold text-primary tracking-tight whitespace-nowrap">
