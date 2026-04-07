@@ -1,0 +1,16 @@
+export { default as HomePage } from './HomePage';
+export { default as LoginPage } from './LoginPage';
+export { default as RegisterPage } from './RegisterPage';
+export { default as EmailVerifyPage } from './EmailVerifyPage';
+export { default as WaitingPage } from './WaitingPage';
+export { default as MatchSuccessPage } from './MatchSuccessPage';
+export { default as MatchFailPage } from './MatchFailPage';
+export { default as MatchReportPage } from './MatchReportPage';
+export { default as ChatRoomPage } from './ChatRoomPage';
+export { default as ProfilePage } from './ProfilePage';
+export { default as QuestionnairePage } from './QuestionnaireWrapper';
+export { default as QuestionnaireModule1 } from './QuestionnaireModule1';
+export { default as QuestionnaireModule2 } from './QuestionnaireModule2';
+export { default as QuestionnaireModule3 } from './QuestionnaireModule3';
+export { default as QuestionnaireModule4 } from './QuestionnaireModule4';
+export { default as QuestionnaireModule5 } from './QuestionnaireModule5';

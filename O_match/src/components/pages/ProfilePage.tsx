@@ -1,0 +1,109 @@
+import React from 'react';
+import { Link } from 'react-router-dom';
+
+const ProfilePage: React.FC = () => {
+  return (
+    <main className="pt-32 pb-44 px-4 md:px-8 max-w-4xl mx-auto">
+      {/* Profile Hero Section */}
+      <div className="glass-card ghost-border rounded-[2.5rem] p-8 md:p-12 shadow-[0_8px_32px_rgba(28,28,24,0.06)] relative overflow-hidden">
+        {/* Decorative Gradient Glow */}
+        <div className="absolute -top-24 -right-24 w-64 h-64 bg-primary-container/20 blur-[80px] rounded-full" />
+
+        <div className="relative flex flex-col md:flex-row items-center md:items-start gap-8">
+          {/* User Avatar */}
+          <div className="relative">
+            <div className="w-32 h-32 rounded-[2rem] overflow-hidden shadow-xl rotate-3 hover:rotate-0 transition-transform duration-500">
+              <img
+                alt="User Avatar"
+                className="w-full h-full object-cover bg-secondary-fixed"
+                src="/avatar.jpg"
+              />
+            </div>
+            <div className="absolute -bottom-2 -right-2 bg-primary text-white p-1.5 rounded-full shadow-lg border-4 border-white">
+              <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
+            </div>
+          </div>
+
+          <div className="flex-1 text-center md:text-left">
+            <h1 className="font-headline text-4xl font-extrabold tracking-tight text-on-surface mb-2">你好，同学</h1>
+            <p className="text-on-surface-variant font-medium mb-6 flex items-center justify-center md:justify-start gap-2">
+              <span className="material-symbols-outlined text-lg">mail</span>
+              @hrbeu.edu.cn
+            </p>
+          </div>
+        </div>
+
+        {/* Account Settings List */}
+        <div className="mt-16 space-y-4">
+          <h2 className="font-headline text-xl font-bold text-on-surface px-2 mb-6">账户设置</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Privacy Settings Card */}
+            <Link to="/security" className="flex items-center p-6 bg-surface-container-low hover:bg-surface-container-lowest transition-all duration-300 rounded-[1.5rem] group text-left">
+              <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-primary shadow-sm group-hover:scale-110 transition-transform">
+                <span className="material-symbols-outlined">shield_person</span>
+              </div>
+              <div className="ml-4 flex-1">
+                <div className="text-on-surface font-bold">隐私设置</div>
+                <div className="text-on-surface-variant text-sm">管理可见性与数据</div>
+              </div>
+              <span className="material-symbols-outlined text-outline-variant group-hover:translate-x-1 transition-transform">chevron_right</span>
+            </Link>
+
+            {/* Notification Preferences Card */}
+            <button className="flex items-center p-6 bg-surface-container-low hover:bg-surface-container-lowest transition-all duration-300 rounded-[1.5rem] group text-left">
+              <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-primary shadow-sm group-hover:scale-110 transition-transform">
+                <span className="material-symbols-outlined">notifications_active</span>
+              </div>
+              <div className="ml-4 flex-1">
+                <div className="text-on-surface font-bold">通知提醒</div>
+                <div className="text-on-surface-variant text-sm">推送与邮件提醒</div>
+              </div>
+              <span className="material-symbols-outlined text-outline-variant group-hover:translate-x-1 transition-transform">chevron_right</span>
+            </button>
+
+            {/* Questionnaire Weighting Card */}
+            <Link to="/questionnaire" className="flex items-center p-6 bg-surface-container-low hover:bg-surface-container-lowest transition-all duration-300 rounded-[1.5rem] group text-left">
+              <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-primary shadow-sm group-hover:scale-110 transition-transform">
+                <span className="material-symbols-outlined">analytics</span>
+              </div>
+              <div className="ml-4 flex-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-on-surface font-bold">问卷中心</span>
+                  <span className="px-2 py-0.5 bg-orange-100 text-orange-700 text-[10px] font-black rounded-md">85% OPTIMIZED</span>
+                </div>
+                <div className="text-on-surface-variant text-sm">匹配算法权重调节</div>
+              </div>
+              <span className="material-symbols-outlined text-outline-variant group-hover:translate-x-1 transition-transform">chevron_right</span>
+            </Link>
+
+            {/* Project Donation Card */}
+            <button className="flex items-center p-6 bg-surface-container-low hover:bg-surface-container-lowest transition-all duration-300 rounded-[1.5rem] group text-left">
+              <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-primary shadow-sm group-hover:scale-110 transition-transform">
+                <span className="material-symbols-outlined">volunteer_activism</span>
+              </div>
+              <div className="ml-4 flex-1">
+                <div className="text-on-surface font-bold">项目捐赠</div>
+                <div className="text-on-surface-variant text-sm">支持我们的校园服务器</div>
+              </div>
+              <span className="material-symbols-outlined text-outline-variant group-hover:translate-x-1 transition-transform">chevron_right</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Footer Action */}
+        <div className="mt-16 flex flex-col items-center gap-8">
+          <button className="group flex items-center gap-3 px-10 py-4 bg-gradient-to-tr from-primary to-primary-container text-white font-bold rounded-full shadow-[0_8px_32px_rgba(148,74,0,0.2)] hover:shadow-[0_12px_40px_rgba(148,74,0,0.3)] transition-all duration-300 active:scale-95">
+            <span className="material-symbols-outlined">logout</span>
+            <span>退出登录</span>
+          </button>
+          <div className="text-center">
+            <div className="text-xs font-bold tracking-widest text-on-surface-variant opacity-50 uppercase mb-1">🍊意配 版本 V2.4.0</div>
+            <div className="text-[10px] text-on-surface-variant opacity-40">© 2024 哈工程学生计算组织。保留所有权利。</div>
+          </div>
+        </div>
+      </div>
+    </main>
+  );
+};
+
+export default ProfilePage;
