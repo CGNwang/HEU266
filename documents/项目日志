@@ -24,6 +24,9 @@
   https://stitch.withgoogle.com/projects/1023403870026049848
 4. 3.31 完成问卷第二板块和第三板块，修复了首页按钮遮挡问题
   https://stitch.withgoogle.com/projects/1023403870026049848
+5. Remix包庆涵的修改，验证交替协作的版本控制逻辑
+  https://stitch.withgoogle.com/projects/16801801122367322583
+
 
 
 ### 注册功能
@@ -44,3 +47,53 @@ UI设计可以参考Date Drop
 
 AI几乎不依赖我们写任何一行代码，所以我们只需要设定基本的编写规范，设定基本的创意信息，并指导AI做事就可以了。现在我们已经有了一个基本的网站模板，并且通过AI studio做了各个页面的构造，接下来我们计划先沿着这个路线继续做下去，接下来的任务是完善当前的UI设计和页面设计。
 
+在页面设计中，很重要的指导性框架就是任务的需要和页面的跳转逻辑，具体说来，包括“要实现什么样的功能，用户需要从哪里跳转到哪里，点击页面的哪里可以发生转换。”
+
+visio或者PPT都能用于此类图的绘制，但是考虑到文字流在交给AI处理时更便利，也可以尝试使用mermaid。
+
+## 页面流程图
+
+flowchart TD
+    Start([用户进入网站]) --> Home[首页/落地页]
+    Home -->|点击登录| Login[登录页]
+    Home -->|点击注册| Register[注册页]
+    
+    Register -->|填写邮箱、密码| SendCode[发送验证码]
+    SendCode -->|输入验证码| EmailVerify{邮箱校验}
+    EmailVerify -->|成功| BindInfo[绑定微信/手机号]
+    EmailVerify -->|失败| Register
+    
+    BindInfo -->|完成绑定| MainPage[主页面/仪表盘]
+    Login -->|账号密码| MainPage
+    
+    MainPage -->|首次登录/未填问卷| CoreQuestion[核心问卷页]
+    MainPage -->|已填问卷| Waiting[匹配等待页]
+    MainPage -->|查看/编辑资料| Profile[个人资料页]
+    
+    CoreQuestion -->|必填项完成| OptionalQuestion{是否填写深度问卷？}
+    OptionalQuestion -->|是| DeepQuestion[深度问卷页<br>可设置权重/偏好]
+    OptionalQuestion -->|否| Waiting
+    
+    DeepQuestion -->|提交| Waiting
+    
+    Waiting -->|每周日20:00定时触发| MatchingEngine[后端匹配引擎]
+    MatchingEngine -->|匹配完成| ResultPage{匹配结果页}
+    
+    ResultPage -->|匹配成功| SuccessReport[匹配报告页<br>契合度雷达图/描述]
+    ResultPage -->|匹配失败| FailReport[安慰文案<br>鼓励更新问卷]
+    
+    SuccessReport -->|进入聊天室| ChatRoom[72小时匿名聊天室]
+    SuccessReport -->|查看对方主页| PartnerProfile[对方匿名主页]
+    SuccessReport -->|返回主页面| Waiting
+    
+    ChatRoom -->|72小时后| RoomExpire[聊天室关闭]
+    ChatRoom -->|举报/屏蔽| Report[举报流程]
+    
+    FailReport -->|更新问卷| CoreQuestion
+    FailReport -->|返回主页面| Waiting
+    
+    Profile -->|编辑问卷| CoreQuestion
+    Profile -->|修改账号安全| SecuritySettings[安全设置页]
+    
+    Report --> AdminReview[管理员后台]
+    AdminReview -->|确认违规| Ban[永久封禁]
