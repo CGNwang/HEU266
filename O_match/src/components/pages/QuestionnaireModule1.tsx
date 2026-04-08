@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { cn } from '@/utils';
 import { useQuestionnaireStore } from '@/store';
@@ -33,23 +33,6 @@ const QuestionnairePage: React.FC = () => {
 
   // 记录需要提示的未完成题目ID
   const [incompleteHintId, setIncompleteHintId] = useState<string | null>(null);
-
-  // 加载已保存的问卷数据（页面加载时执行）
-  useEffect(() => {
-    const loadSavedData = async () => {
-      const saved = await loadQuestionnaire();
-      if (saved?.module1) {
-        setFormData({
-          gender: saved.module1.gender || '',
-          expectedGender: saved.module1.expectedGender || '',
-          stage: saved.module1.stage || '',
-          partnerStages: saved.module1.partnerStages || [],
-          locations: saved.module1.locations || [],
-        });
-      }
-    };
-    loadSavedData();
-  }, []);
 
   // 计算当前模块已完成题目数
   const currentModuleProgress = [

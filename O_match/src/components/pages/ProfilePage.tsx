@@ -11,6 +11,7 @@ const ProfilePage: React.FC = () => {
     await logoutService(); // 清除 localStorage
     logout(); // 清除 zustand store
     navigate('/'); // 跳转到首页
+    window.scrollTo({ top: 0, behavior: 'auto' }); // 回到首页顶部
   };
   return (
     <main className="pt-32 pb-44 px-4 md:px-8 max-w-4xl mx-auto">

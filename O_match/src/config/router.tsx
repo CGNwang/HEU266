@@ -12,6 +12,7 @@ import {
   ChatRoomPage,
   QuestionnairePage,
   ProfilePage,
+  QuestionnaireRequiredPage,
   SecurityPage,
   BindInfoPage,
   DonatePage,
@@ -38,6 +39,10 @@ export const router = createBrowserRouter([
       {
         path: 'waiting',
         element: <WaitingPage />,
+      },
+      {
+        path: 'questionnaire-required',
+        element: <QuestionnaireRequiredPage />,
       },
       {
         path: 'match-success',

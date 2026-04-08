@@ -1,0 +1,38 @@
+import React from 'react';
+import { Link } from 'react-router-dom';
+
+const QuestionnaireRequiredPage: React.FC = () => {
+  return (
+    <main className="pt-24 pb-24 px-4 max-w-3xl mx-auto min-h-[70vh] flex items-center">
+      <section className="w-full glass-card ghost-border rounded-[2rem] p-8 md:p-12 text-center shadow-[0_8px_32px_rgba(28,28,24,0.06)]">
+        <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-orange-100 flex items-center justify-center">
+          <span className="material-symbols-outlined text-3xl text-orange-700" style={{ fontVariationSettings: "'FILL' 1" }}>
+            assignment
+          </span>
+        </div>
+        <h1 className="text-3xl font-black tracking-tight text-on-surface mb-3">先完成问卷，再查看匹配</h1>
+        <p className="text-on-surface-variant leading-relaxed mb-8">
+          你还没有完成并提交问卷，暂时无法进入“我的匹配”。
+          <br />
+          先去完成问卷，提交后即可参与并查看匹配进度。
+        </p>
+        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <Link
+            to="/questionnaire/1"
+            className="px-6 py-3 rounded-full bg-primary text-white font-bold hover:opacity-90 transition-opacity"
+          >
+            去完成问卷
+          </Link>
+          <Link
+            to="/"
+            className="px-6 py-3 rounded-full bg-surface-container-high text-on-surface font-bold hover:bg-surface-container-low transition-colors"
+          >
+            返回首页
+          </Link>
+        </div>
+      </section>
+    </main>
+  );
+};
+
+export default QuestionnaireRequiredPage;

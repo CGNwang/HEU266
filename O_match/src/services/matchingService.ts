@@ -12,6 +12,18 @@
 
 const MATCHING_STORAGE_KEY = 'stitch_o_match_matching';
 
+export const hasJoinedMatching = (): boolean => {
+  const stored = localStorage.getItem(MATCHING_STORAGE_KEY);
+  if (!stored) return false;
+
+  try {
+    const status = JSON.parse(stored) as MatchingStatus;
+    return Boolean(status?.isJoined);
+  } catch {
+    return false;
+  }
+};
+
 /**
  * 匹配状态
  */

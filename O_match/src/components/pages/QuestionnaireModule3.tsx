@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { cn } from '@/utils';
 import { useQuestionnaireStore } from '@/store';
@@ -56,17 +56,6 @@ const QuestionnaireModule3: React.FC = () => {
 
   // 记录需要提示的未完成题目ID
   const [incompleteHintId, setIncompleteHintId] = useState<string | null>(null);
-
-  // 加载已保存的问卷数据
-  useEffect(() => {
-    const loadSavedData = async () => {
-      const saved = await loadQuestionnaire();
-      if (saved?.module3) {
-        setFormData(saved.module3);
-      }
-    };
-    loadSavedData();
-  }, []);
 
   // 计算当前模块已完成题目数（只有 preference 选项选择后才计入完成度）
   const currentModuleProgress = Object.keys(formData).filter(key => {

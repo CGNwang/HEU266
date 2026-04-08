@@ -15,9 +15,8 @@ const LoginPage: React.FC = () => {
     setLoading(true);
 
     try {
-      // 使用用户名登录（邮箱前缀作为用户名）
       const username = email.split('@')[0];
-      const result = await login({ username, password });
+      const result = await login({ username, email, password });
 
       if (result.success) {
         navigate('/questionnaire');
@@ -38,7 +37,7 @@ const LoginPage: React.FC = () => {
       <div className="fixed bottom-[-15%] left-[-10%] w-[600px] h-[600px] warm-glow rounded-full pointer-events-none opacity-60" />
 
       {/* Top Navigation / Branding */}
-      <div className="fixed top-8 left-1/2 -translate-x-1/2 z-50 pointer-events-none">
+      <div className="absolute top-8 left-1/2 -translate-x-1/2 z-50 pointer-events-none">
         <div className="text-3xl font-black text-orange-700 tracking-tighter flex items-center gap-2">
           <Link to="/" className="flex items-center gap-2 pointer-events-auto">
             <span>🍊</span>

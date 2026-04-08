@@ -1,6 +1,8 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/utils';
+import { useAuthStore } from '@/store';
+import { hasJoinedMatching } from '@/services/matchingService';
 
 interface HeaderProps {
   className?: string;
@@ -8,6 +10,7 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ className }) => {
   const location = useLocation();
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
   const navItems = [
     { path: '/', label: '首页' },
@@ -18,6 +21,19 @@ export const Header: React.FC<HeaderProps> = ({ className }) => {
   const isActive = (path: string) => {
     if (path === '/') return location.pathname === '/';
     return location.pathname.startsWith(path);
+  };
+
+  const getTargetPath = (path: string) => {
+    const protectedPaths = new Set(['/questionnaire', '/waiting', '/chat', '/profile']);
+    if (!isAuthenticated && protectedPaths.has(path)) {
+      return '/login';
+    }
+
+    if (path === '/waiting' && isAuthenticated && !hasJoinedMatching()) {
+      return '/questionnaire-required';
+    }
+
+    return path;
   };
 
   return (
@@ -43,7 +59,7 @@ export const Header: React.FC<HeaderProps> = ({ className }) => {
         {navItems.map((item) => (
           <Link
             key={item.path}
-            to={item.path}
+            to={getTargetPath(item.path)}
             className={cn(
               'hover:text-orange-600 transition-colors',
               isActive(item.path) && 'text-orange-700 dark:text-orange-400 font-bold border-b-2 border-orange-500 pb-1'
@@ -57,13 +73,13 @@ export const Header: React.FC<HeaderProps> = ({ className }) => {
       {/* Right Icons */}
       <div className="flex items-center gap-2 md:gap-4 text-orange-600 dark:text-orange-400">
         <Link
-          to="/chat"
+          to={getTargetPath('/chat')}
           className="p-2 hover:bg-orange-50/50 dark:hover:bg-stone-800/50 rounded-lg transition-all active:scale-95"
         >
           <span className="material-symbols-outlined text-2xl">notifications</span>
         </Link>
         <Link
-          to="/profile"
+          to={getTargetPath('/profile')}
           className="p-2 hover:bg-orange-50/50 dark:hover:bg-stone-800/50 rounded-lg transition-all active:scale-95"
         >
           <span className="material-symbols-outlined text-2xl">account_circle</span>
