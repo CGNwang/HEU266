@@ -14,6 +14,87 @@
 
 const STORAGE_KEY = 'stitch_o_match_questionnaire';
 
+const isModule1Complete = (module1: QuestionnaireAnswer['module1']): boolean =>
+  Boolean(
+    module1 &&
+    module1.gender &&
+    module1.expectedGender &&
+    module1.stage &&
+    module1.partnerStages?.length &&
+    module1.locations?.length
+  );
+
+const isModule2Complete = (module2: QuestionnaireAnswer['module2']): boolean =>
+  Boolean(
+    module2 &&
+    module2.q1Schedule &&
+    module2.q1Attitude &&
+    module2.q2Space &&
+    module2.q2Tolerance &&
+    module2.q3Frequency &&
+    module2.q3Bottomline &&
+    module2.q4Smoking &&
+    module2.q4Bottomline &&
+    module2.q5Alcohol &&
+    module2.q5Bottomline
+  );
+
+const isModule3Complete = (module3: QuestionnaireAnswer['module3']): boolean =>
+  Boolean(
+    module3 &&
+    module3.q1Preference &&
+    module3.q2Preference &&
+    module3.q3Preference &&
+    module3.q4Preference &&
+    module3.q5Preference &&
+    module3.q6Preference &&
+    module3.q7Preference &&
+    module3.q8Preference &&
+    module3.q9Preference &&
+    module3.q10Preference
+  );
+
+const isModule4Complete = (module4: QuestionnaireAnswer['module4']): boolean =>
+  Boolean(
+    module4 &&
+    module4.q1 &&
+    module4.q2 &&
+    module4.q3 &&
+    module4.q4 &&
+    module4.q5 &&
+    module4.q6
+  );
+
+const isModule5Complete = (module5: QuestionnaireAnswer['module5']): boolean =>
+  Boolean(
+    module5 &&
+    module5.q1 &&
+    module5.q2?.length &&
+    module5.q3 &&
+    module5.q4 &&
+    module5.q5 &&
+    module5.q6 &&
+    module5.q7?.length
+  );
+
+export const hasSubmittedQuestionnaire = (): boolean => {
+  const stored = localStorage.getItem(STORAGE_KEY);
+  if (!stored) return false;
+
+  try {
+    const data = JSON.parse(stored) as QuestionnaireAnswer;
+    return (
+      isModule1Complete(data.module1) &&
+      isModule2Complete(data.module2) &&
+      isModule3Complete(data.module3) &&
+      isModule4Complete(data.module4) &&
+      isModule5Complete(data.module5)
+    );
+  } catch {
+    return false;
+  }
+};
+
 /**
  * 问卷答案数据结构
  * 后续后端可沿用此结构，或进行扩展

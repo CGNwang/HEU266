@@ -1,9 +1,12 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/utils';
+import { useAuthStore } from '@/store';
+import { hasSubmittedQuestionnaire } from '@/services/questionnaireService';
 
 export const MobileNav: React.FC = () => {
   const location = useLocation();
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
   const navItems = [
     { path: '/', label: '首页', icon: 'home', activeIcon: 'home' },
@@ -12,8 +15,26 @@ export const MobileNav: React.FC = () => {
   ];
 
   const isActive = (path: string) => {
+    if (location.pathname === '/questionnaire-required') {
+      if (path === '/waiting') return true;
+      if (path === '/questionnaire') return false;
+    }
+
     if (path === '/') return location.pathname === '/';
     return location.pathname.startsWith(path);
+  };
+
+  const getTargetPath = (path: string) => {
+    const protectedPaths = new Set(['/questionnaire', '/waiting']);
+    if (!isAuthenticated && protectedPaths.has(path)) {
+      return '/login';
+    }
+
+    if (path === '/waiting' && isAuthenticated && !hasSubmittedQuestionnaire()) {
+      return '/questionnaire-required';
+    }
+
+    return path;
   };
 
   return (
@@ -27,7 +48,7 @@ export const MobileNav: React.FC = () => {
         {navItems.map((item) => (
           <Link
             key={item.path}
-            to={item.path}
+            to={getTargetPath(item.path)}
             className={cn(
               'flex flex-col items-center gap-1 transition-colors',
               isActive(item.path)

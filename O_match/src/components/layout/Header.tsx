@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/utils';
 import { useAuthStore } from '@/store';
-import { hasJoinedMatching } from '@/services/matchingService';
+import { hasSubmittedQuestionnaire } from '@/services/questionnaireService';
 
 interface HeaderProps {
   className?: string;
@@ -19,6 +19,11 @@ export const Header: React.FC<HeaderProps> = ({ className }) => {
   ];
 
   const isActive = (path: string) => {
+    if (location.pathname === '/questionnaire-required') {
+      if (path === '/waiting') return true;
+      if (path === '/questionnaire') return false;
+    }
+
     if (path === '/') return location.pathname === '/';
     return location.pathname.startsWith(path);
   };
@@ -29,7 +34,7 @@ export const Header: React.FC<HeaderProps> = ({ className }) => {
       return '/login';
     }
 
-    if (path === '/waiting' && isAuthenticated && !hasJoinedMatching()) {
+    if (path === '/waiting' && isAuthenticated && !hasSubmittedQuestionnaire()) {
       return '/questionnaire-required';
     }
 
