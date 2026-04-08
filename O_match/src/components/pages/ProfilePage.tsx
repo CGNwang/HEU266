@@ -107,10 +107,6 @@ const ProfilePage: React.FC = () => {
             <span className="material-symbols-outlined">logout</span>
             <span>退出登录</span>
           </button>
-          <div className="text-center">
-            <div className="text-xs font-bold tracking-widest text-on-surface-variant opacity-50 uppercase mb-1">🍊意配 版本 V2.4.0</div>
-            <div className="text-[10px] text-on-surface-variant opacity-40">© 2024 哈工程学生计算组织。保留所有权利。</div>
-          </div>
         </div>
       </div>
     </main>
