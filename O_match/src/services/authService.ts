@@ -39,6 +39,11 @@ export interface SendCodeResult {
   message?: string;
 }
 
+export interface ResetPasswordResult {
+  success: boolean;
+  message?: string;
+}
+
 interface MockStoredUser {
   username: string;
   password: string;
@@ -378,6 +383,44 @@ export const logout = async (): Promise<void> => {
     await supabase.auth.signOut();
   }
   clearClientAuth();
+};
+
+export const sendPasswordResetEmail = async (email: string): Promise<SendCodeResult> => {
+  const normalizedEmail = email.trim().toLowerCase();
+  if (!isHrbeuEmail(normalizedEmail)) {
+    return { success: false, message: HRBEU_EMAIL_MESSAGE };
+  }
+
+  if (!hasSupabaseConfig || !supabase) {
+    return { success: false, message: '当前开发模式未启用真实找回密码邮件，请连接 Supabase 后再使用' };
+  }
+
+  const redirectTo = `${window.location.origin}/reset-password`;
+  const { error } = await supabase.auth.resetPasswordForEmail(normalizedEmail, {
+    redirectTo,
+  });
+
+  if (error) {
+    return { success: false, message: error.message };
+  }
+
+  return { success: true, message: '重置密码邮件已发送，请前往邮箱查收' };
+};
+
+export const resetPassword = async (newPassword: string): Promise<ResetPasswordResult> => {
+  if (!hasSupabaseConfig || !supabase) {
+    return { success: false, message: '当前开发模式未启用真实密码重置功能' };
+  }
+
+  const { error } = await supabase.auth.updateUser({
+    password: newPassword,
+  });
+
+  if (error) {
+    return { success: false, message: error.message };
+  }
+
+  return { success: true, message: '密码已更新' };
 };
 
 export const getCurrentUser = async (): Promise<User | null> => {

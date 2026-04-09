@@ -23,13 +23,16 @@ const SecurityPage: React.FC = () => {
           </h2>
           <div className="space-y-4">
             {/* Change Password */}
-            <button className="w-full flex items-center p-4 bg-surface-container-low hover:bg-surface-container-lowest transition-all duration-300 rounded-2xl group text-left">
+            <button
+              onClick={() => navigate('/change-password')}
+              className="w-full flex items-center p-4 bg-surface-container-low hover:bg-surface-container-lowest transition-all duration-300 rounded-2xl group text-left"
+            >
               <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-primary shadow-sm group-hover:scale-110 transition-transform">
                 <span className="material-symbols-outlined">lock</span>
               </div>
               <div className="ml-4 flex-1">
                 <div className="text-on-surface font-bold">修改密码</div>
-                <div className="text-on-surface-variant text-sm">定期更换密码保护账号</div>
+                <div className="text-on-surface-variant text-sm">先验证校园邮箱，再进入密码重设</div>
               </div>
               <span className="material-symbols-outlined text-outline-variant group-hover:translate-x-1 transition-transform">chevron_right</span>
             </button>

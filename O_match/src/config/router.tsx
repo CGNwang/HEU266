@@ -5,6 +5,9 @@ import {
   HomePage,
   LoginPage,
   RegisterPage,
+  ForgotPasswordPage,
+  ResetPasswordPage,
+  ChangePasswordPage,
   WaitingPage,
   MatchSuccessPage,
   MatchFailPage,
@@ -98,6 +101,18 @@ export const router = createBrowserRouter([
       {
         path: '/register',
         element: <RegisterPage />,
+      },
+      {
+        path: '/forgot-password',
+        element: <ForgotPasswordPage />,
+      },
+      {
+        path: '/change-password',
+        element: <ChangePasswordPage />,
+      },
+      {
+        path: '/reset-password',
+        element: <ResetPasswordPage />,
       },
       {
         // 捕获所有未匹配路由，重定向到首页
