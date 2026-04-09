@@ -21,6 +21,7 @@
 - ✅ **前端工程**：可本地启动与预览，支持无后端的 localStorage 降级模式
 - ✅ **Supabase 集成**：认证服务（邮箱注册/登录/登出）已接入，支持自动降级
 - ✅ **数据库 Schema**：10 张表的完整定义与 RLS 策略脚本已就绪（见 `docs/`）
+- ✅ **邮箱域名限制**：已提供后端约束脚本，确保仅允许 `@hrbeu.edu.cn` 注册
 - ✅ **匹配 Edge Function**：周批量匹配调度函数已编写（`docs/edge-functions/`）
 - 🚧 **用户资料服务**：待实现 `userService.ts`，联调 ProfilePage / BindInfoPage
 - 🚧 **问卷与匹配服务**：待实现 `questionnaireService.ts` / `matchingService.ts`
@@ -105,7 +106,8 @@ npm run preview
 1. **[docs/SUPABASE_SETUP.md](docs/SUPABASE_SETUP.md)**：创建 Supabase 项目、获取 API Key
 2. **[docs/database-schema.sql](docs/database-schema.sql)**：在 SQL Editor 中执行以初始化数据库
 3. **[docs/database-rls.sql](docs/database-rls.sql)**：执行行级安全策略
-4. **[docs/FRONTEND_INTEGRATION.md](docs/FRONTEND_INTEGRATION.md)**：前端各阶段对接指南
+4. **[docs/auth-email-domain-constraint.sql](docs/auth-email-domain-constraint.sql)**：执行邮箱域名限制
+5. **[docs/FRONTEND_INTEGRATION.md](docs/FRONTEND_INTEGRATION.md)**：前端各阶段对接指南
 
 ---
 

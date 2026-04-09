@@ -1,19 +1,98 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { register } from '@/services/authService';
+import { registerWithEmailCode, sendRegisterEmailCode } from '@/services/authService';
+
+const HRBEU_EMAIL_MESSAGE = '仅支持 HEU 校园邮箱';
+const HRBEU_EMAIL_SUFFIX = '@hrbeu.edu.cn';
 
 const RegisterPage: React.FC = () => {
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
+  const [emailPrefix, setEmailPrefix] = useState('');
   const [code, setCode] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
+  const [hint, setHint] = useState('');
+  const [sendingCode, setSendingCode] = useState(false);
+  const [codeCooldown, setCodeCooldown] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  React.useEffect(() => {
+    if (codeCooldown <= 0) {
+      return;
+    }
+
+    const timer = window.setInterval(() => {
+      setCodeCooldown((prev) => (prev <= 1 ? 0 : prev - 1));
+    }, 1000);
+
+    return () => window.clearInterval(timer);
+  }, [codeCooldown]);
+
+  const normalizeEmailPrefix = (value: string) => value.trim().toLowerCase().replace(/@hrbeu\.edu\.cn$/i, '');
+
+  const buildHrbeuEmail = (value: string) => {
+    const prefix = normalizeEmailPrefix(value);
+    return prefix ? `${prefix}${HRBEU_EMAIL_SUFFIX}` : '';
+  };
+
+  const validateHrbeuEmailPrefix = (value: string) => {
+    const prefix = normalizeEmailPrefix(value);
+    return Boolean(prefix) && !prefix.includes('@');
+  };
+
+  const handleSendCode = async () => {
+    setError('');
+    setHint('');
+
+    const normalizedEmailPrefix = normalizeEmailPrefix(emailPrefix);
+    if (!normalizedEmailPrefix) {
+      setError('请先填写邮箱前缀');
+      return;
+    }
+
+    if (!validateHrbeuEmailPrefix(normalizedEmailPrefix)) {
+      setError(HRBEU_EMAIL_MESSAGE);
+      return;
+    }
+
+    if (codeCooldown > 0 || sendingCode) {
+      return;
+    }
+
+    setSendingCode(true);
+    try {
+      const result = await sendRegisterEmailCode(buildHrbeuEmail(normalizedEmailPrefix));
+      if (result.success) {
+        setHint(result.message || '验证码已发送，请前往邮箱查收');
+        setCodeCooldown(60);
+      } else {
+        setError(result.message || '验证码发送失败');
+      }
+    } catch {
+      setError('验证码发送失败，请稍后重试');
+    } finally {
+      setSendingCode(false);
+    }
+  };
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setHint('');
+
+    const normalizedEmailPrefix = normalizeEmailPrefix(emailPrefix);
+    if (!validateHrbeuEmailPrefix(normalizedEmailPrefix)) {
+      setError(HRBEU_EMAIL_MESSAGE);
+      return;
+    }
+
+    if (!code.trim()) {
+      setError('请输入邮箱验证码');
+      return;
+    }
 
     // 验证密码
     if (password !== confirmPassword) {
@@ -30,8 +109,14 @@ const RegisterPage: React.FC = () => {
 
     try {
       // 使用邮箱前缀作为用户名
-      const username = email.split('@')[0];
-      const result = await register({ username, password, email });
+      const username = normalizedEmailPrefix;
+      const email = buildHrbeuEmail(normalizedEmailPrefix);
+      const result = await registerWithEmailCode({
+        username,
+        password,
+        email,
+        code: code.trim(),
+      });
 
       if (result.success) {
         navigate('/bind-info');
@@ -67,22 +152,29 @@ const RegisterPage: React.FC = () => {
           {/* Header Section */}
           <div className="mb-10 w-full">
             <h1 className="text-3xl font-bold font-headline text-on-surface tracking-tight mb-2">注册账号</h1>
-            <p className="text-on-surface-variant text-sm">填写信息以开启你的灵魂之旅</p>
           </div>
 
           {/* Form Body */}
           <form className="w-full space-y-6 text-left" onSubmit={handleRegister}>
             {/* Email Field */}
             <div className="space-y-2">
-              <label className="text-[11px] font-bold uppercase tracking-widest text-on-surface-variant ml-4">电子邮箱</label>
-              <div className="relative group">
+              <label className="text-[11px] font-bold uppercase tracking-widest text-on-surface-variant ml-4">校园邮箱</label>
+              <div className="relative group flex items-stretch overflow-hidden rounded-2xl ghost-border bg-surface-container-low transition-all duration-300 focus-within:bg-surface-container-lowest">
                 <input
-                  className="w-full bg-surface-container-low border-none rounded-2xl py-4 px-6 text-on-surface placeholder:text-outline/40 focus:ring-0 focus:bg-surface-container-lowest transition-all duration-300 ghost-border"
-                  placeholder="name@hrbeu.edu.cn"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  className="min-w-0 flex-1 bg-transparent border-none py-4 px-6 text-on-surface placeholder:text-outline/40 focus:ring-0 focus:outline-none"
+                  placeholder="邮箱"
+                  type="text"
+                  inputMode="email"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  value={emailPrefix}
+                  onChange={(e) => setEmailPrefix(e.target.value)}
                 />
+                <div className="flex items-center px-4 text-[15px] font-bold text-on-surface-variant whitespace-nowrap">
+                  <span className="text-[22px] leading-none mr-0.5" style={{ fontFamily: '"Avenir Next", "Futura", "Helvetica Neue", "PingFang SC", sans-serif', fontWeight: 500 }}>@</span>
+                  <span>hrbeu.edu.cn</span>
+                </div>
               </div>
             </div>
 
@@ -92,13 +184,18 @@ const RegisterPage: React.FC = () => {
               <div className="relative group">
                 <input
                   className="w-full bg-surface-container-low border-none rounded-2xl py-4 px-6 pr-32 text-on-surface placeholder:text-outline/40 focus:ring-0 focus:bg-surface-container-lowest transition-all duration-300 ghost-border"
-                  placeholder="6位数字"
+                  placeholder="请输入验证码"
                   type="text"
                   value={code}
                   onChange={(e) => setCode(e.target.value)}
                 />
-                <button className="absolute right-4 top-1/2 -translate-y-1/2 text-[11px] font-bold text-primary uppercase tracking-wider" type="button">
-                  获取验证码
+                <button
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-[11px] font-bold text-primary uppercase tracking-wider disabled:text-outline/60"
+                  type="button"
+                  onClick={handleSendCode}
+                  disabled={sendingCode || codeCooldown > 0}
+                >
+                  {sendingCode ? '发送中...' : codeCooldown > 0 ? `${codeCooldown}s后重发` : '获取验证码'}
                 </button>
               </div>
             </div>
@@ -108,12 +205,23 @@ const RegisterPage: React.FC = () => {
               <label className="text-[11px] font-bold uppercase tracking-widest text-on-surface-variant ml-4">设置密码</label>
               <div className="relative group">
                 <input
-                  className="w-full bg-surface-container-low border-none rounded-2xl py-4 px-6 text-on-surface placeholder:text-outline/40 focus:ring-0 focus:bg-surface-container-lowest transition-all duration-300 ghost-border"
+                  className="w-full bg-surface-container-low border-none rounded-2xl py-4 px-6 pr-20 text-on-surface placeholder:text-outline/40 focus:ring-0 focus:bg-surface-container-lowest transition-all duration-300 ghost-border"
                   placeholder="••••••••"
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
+                <button
+                  type="button"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-primary transition-colors"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  aria-label={showPassword ? '隐藏密码' : '显示密码'}
+                  title={showPassword ? '隐藏密码' : '显示密码'}
+                >
+                  <span className="material-symbols-outlined text-[20px] leading-none">
+                    {showPassword ? 'visibility' : 'visibility_off'}
+                  </span>
+                </button>
               </div>
             </div>
 
@@ -122,18 +230,33 @@ const RegisterPage: React.FC = () => {
               <label className="text-[11px] font-bold uppercase tracking-widest text-on-surface-variant ml-4">确认密码</label>
               <div className="relative group">
                 <input
-                  className="w-full bg-surface-container-low border-none rounded-2xl py-4 px-6 text-on-surface placeholder:text-outline/40 focus:ring-0 focus:bg-surface-container-lowest transition-all duration-300 ghost-border"
+                  className="w-full bg-surface-container-low border-none rounded-2xl py-4 px-6 pr-20 text-on-surface placeholder:text-outline/40 focus:ring-0 focus:bg-surface-container-lowest transition-all duration-300 ghost-border"
                   placeholder="••••••••"
-                  type="password"
+                  type={showConfirmPassword ? 'text' : 'password'}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                 />
+                <button
+                  type="button"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-primary transition-colors"
+                  onClick={() => setShowConfirmPassword((prev) => !prev)}
+                  aria-label={showConfirmPassword ? '隐藏密码' : '显示密码'}
+                  title={showConfirmPassword ? '隐藏密码' : '显示密码'}
+                >
+                  <span className="material-symbols-outlined text-[20px] leading-none">
+                    {showConfirmPassword ? 'visibility' : 'visibility_off'}
+                  </span>
+                </button>
               </div>
             </div>
 
             {/* Error Message */}
             {error && (
               <div className="text-red-500 text-sm text-center">{error}</div>
+            )}
+
+            {hint && (
+              <div className="text-green-600 text-sm text-center">{hint}</div>
             )}
 
             {/* Action Button */}

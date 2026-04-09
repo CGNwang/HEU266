@@ -5,7 +5,6 @@ import {
   HomePage,
   LoginPage,
   RegisterPage,
-  EmailVerifyPage,
   WaitingPage,
   MatchSuccessPage,
   MatchFailPage,
@@ -99,10 +98,6 @@ export const router = createBrowserRouter([
       {
         path: '/register',
         element: <RegisterPage />,
-      },
-      {
-        path: '/email-verify',
-        element: <EmailVerifyPage />,
       },
       {
         // 捕获所有未匹配路由，重定向到首页

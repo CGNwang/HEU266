@@ -1,7 +1,6 @@
 export { default as HomePage } from './HomePage';
 export { default as LoginPage } from './LoginPage';
 export { default as RegisterPage } from './RegisterPage';
-export { default as EmailVerifyPage } from './EmailVerifyPage';
 export { default as WaitingPage } from './WaitingPage';
 export { default as MatchSuccessPage } from './MatchSuccessPage';
 export { default as MatchFailPage } from './MatchFailPage';

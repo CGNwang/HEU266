@@ -2,20 +2,43 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { login } from '@/services/authService';
 
+const HRBEU_EMAIL_SUFFIX = '@hrbeu.edu.cn';
+const HRBEU_EMAIL_MESSAGE = '仅支持 HEU 校园邮箱';
+
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
+  const [emailPrefix, setEmailPrefix] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const normalizeEmailPrefix = (value: string) => value.trim().toLowerCase().replace(/@hrbeu\.edu\.cn$/i, '');
+
+  const validateHrbeuEmailPrefix = (value: string) => {
+    const prefix = normalizeEmailPrefix(value);
+    return Boolean(prefix) && !prefix.includes('@');
+  };
+
+  const buildHrbeuEmail = (value: string) => {
+    const prefix = normalizeEmailPrefix(value);
+    return prefix ? `${prefix}${HRBEU_EMAIL_SUFFIX}` : '';
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    const normalizedPrefix = normalizeEmailPrefix(emailPrefix);
+    if (!validateHrbeuEmailPrefix(normalizedPrefix)) {
+      setError(HRBEU_EMAIL_MESSAGE);
+      return;
+    }
+
     setLoading(true);
 
     try {
-      const username = email.split('@')[0];
+      const username = normalizedPrefix;
+      const email = buildHrbeuEmail(normalizedPrefix);
       const result = await login({ username, email, password });
 
       if (result.success) {
@@ -60,16 +83,24 @@ const LoginPage: React.FC = () => {
             {/* Email Field */}
             <div className="space-y-2">
               <label className="text-[11px] font-bold uppercase tracking-widest text-on-surface-variant ml-4">
-                电子邮箱
+                校园邮箱
               </label>
-              <div className="relative group">
+              <div className="relative group flex items-stretch overflow-hidden rounded-2xl ghost-border bg-surface-container-low transition-all duration-300 focus-within:bg-surface-container-lowest">
                 <input
-                  className="w-full bg-surface-container-low border-none rounded-2xl py-4 px-6 text-on-surface placeholder:text-outline/40 focus:ring-0 focus:bg-surface-container-lowest transition-all duration-300 ghost-border"
-                  placeholder="name@hrbeu.edu.cn"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  className="min-w-0 flex-1 bg-transparent border-none py-4 px-6 text-on-surface placeholder:text-outline/40 focus:ring-0 focus:outline-none"
+                  placeholder="邮箱"
+                  type="text"
+                  inputMode="email"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  value={emailPrefix}
+                  onChange={(e) => setEmailPrefix(e.target.value)}
                 />
+                <div className="flex items-center px-4 text-[15px] font-bold text-on-surface-variant whitespace-nowrap">
+                  <span className="text-[22px] leading-none mr-0.5" style={{ fontFamily: '"Avenir Next", "Futura", "Helvetica Neue", "PingFang SC", sans-serif', fontWeight: 500 }}>@</span>
+                  <span>hrbeu.edu.cn</span>
+                </div>
               </div>
             </div>
 
@@ -114,7 +145,7 @@ const LoginPage: React.FC = () => {
           {/* Bottom Guide */}
           <div className="pt-8 border-t border-orange-100/30 w-full mt-10">
             <p className="text-sm font-medium text-on-surface-variant">
-              还没有账号？<Link to="/email-verify" className="text-secondary font-bold hover:opacity-80 transition-opacity ml-1">立即注册</Link>
+              还没有账号？<Link to="/register" className="text-secondary font-bold hover:opacity-80 transition-opacity ml-1">立即注册</Link>
             </p>
           </div>
         </div>

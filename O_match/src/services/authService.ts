@@ -5,7 +5,10 @@ import { hasSupabaseConfig, supabase } from '@/lib/supabase';
 const AUTH_STORAGE_KEY = 'stitch_o_match_auth';
 const TOKEN_STORAGE_KEY = 'stitch_o_match_token';
 const USER_STORAGE_KEY = 'stitch_o_match_user';
+const OTP_STORAGE_KEY = 'stitch_o_match_register_otp';
 const INVALID_CREDENTIAL_MESSAGE = '账号或密码错误';
+const HRBEU_EMAIL_SUFFIX = '@hrbeu.edu.cn';
+const HRBEU_EMAIL_MESSAGE = '仅支持 HEU 校园邮箱';
 
 export interface LoginResult {
   success: boolean;
@@ -27,11 +30,26 @@ export interface LoginData {
   password: string;
 }
 
+export interface RegisterWithCodeData extends RegisterData {
+  code: string;
+}
+
+export interface SendCodeResult {
+  success: boolean;
+  message?: string;
+}
+
 interface MockStoredUser {
   username: string;
   password: string;
   email?: string;
   nickname?: string;
+}
+
+interface MockOtpRecord {
+  email: string;
+  code: string;
+  expiresAt: number;
 }
 
 const isInvalidCredentialError = (message?: string): boolean => {
@@ -87,6 +105,131 @@ const clearClientAuth = () => {
 const readMockUsers = (): MockStoredUser[] => {
   const stored = localStorage.getItem(AUTH_STORAGE_KEY);
   return stored ? JSON.parse(stored) as MockStoredUser[] : [];
+};
+
+const readMockOtps = (): MockOtpRecord[] => {
+  const stored = localStorage.getItem(OTP_STORAGE_KEY);
+  return stored ? JSON.parse(stored) as MockOtpRecord[] : [];
+};
+
+const writeMockOtps = (otps: MockOtpRecord[]) => {
+  localStorage.setItem(OTP_STORAGE_KEY, JSON.stringify(otps));
+};
+
+const isHrbeuEmail = (email: string): boolean => {
+  return email.toLowerCase().endsWith(HRBEU_EMAIL_SUFFIX);
+};
+
+const fallbackSendRegisterCode = async (email: string): Promise<SendCodeResult> => {
+  const normalizedEmail = email.trim().toLowerCase();
+  if (!isHrbeuEmail(normalizedEmail)) {
+    return { success: false, message: HRBEU_EMAIL_MESSAGE };
+  }
+
+  const code = Math.floor(100000 + Math.random() * 900000).toString();
+  const expiresAt = Date.now() + 10 * 60 * 1000;
+  const otps = readMockOtps().filter((item) => item.email !== normalizedEmail && item.expiresAt > Date.now());
+  otps.push({ email: normalizedEmail, code, expiresAt });
+  writeMockOtps(otps);
+
+  return {
+    success: true,
+    message: `本地开发模式验证码：${code}（10分钟内有效）`,
+  };
+};
+
+const fallbackRegisterWithCode = async (data: RegisterWithCodeData): Promise<LoginResult> => {
+  const normalizedEmail = data.email?.trim().toLowerCase() ?? '';
+  if (!isHrbeuEmail(normalizedEmail)) {
+    return { success: false, message: HRBEU_EMAIL_MESSAGE };
+  }
+
+  const otps = readMockOtps();
+  const matchedOtp = otps.find((item) => item.email === normalizedEmail && item.code === data.code.trim());
+  if (!matchedOtp) {
+    return { success: false, message: '验证码错误' };
+  }
+
+  if (matchedOtp.expiresAt < Date.now()) {
+    writeMockOtps(otps.filter((item) => item.email !== normalizedEmail && item.expiresAt > Date.now()));
+    return { success: false, message: '验证码已过期，请重新获取' };
+  }
+
+  writeMockOtps(otps.filter((item) => item.email !== normalizedEmail && item.expiresAt > Date.now()));
+  return fallbackRegister({
+    ...data,
+    email: normalizedEmail,
+  });
+};
+
+export const sendRegisterEmailCode = async (email: string): Promise<SendCodeResult> => {
+  const normalizedEmail = email.trim().toLowerCase();
+  if (!isHrbeuEmail(normalizedEmail)) {
+    return { success: false, message: HRBEU_EMAIL_MESSAGE };
+  }
+
+  if (!hasSupabaseConfig || !supabase) {
+    return fallbackSendRegisterCode(normalizedEmail);
+  }
+
+  const { error } = await supabase.auth.signInWithOtp({
+    email: normalizedEmail,
+    options: {
+      shouldCreateUser: true,
+    },
+  });
+
+  if (error) {
+    return { success: false, message: error.message };
+  }
+
+  return { success: true, message: '验证码已发送，请前往邮箱查收' };
+};
+
+export const registerWithEmailCode = async (data: RegisterWithCodeData): Promise<LoginResult> => {
+  const normalizedEmail = data.email?.trim().toLowerCase() ?? '';
+  if (!isHrbeuEmail(normalizedEmail)) {
+    return { success: false, message: HRBEU_EMAIL_MESSAGE };
+  }
+
+  if (!hasSupabaseConfig || !supabase) {
+    return fallbackRegisterWithCode({
+      ...data,
+      email: normalizedEmail,
+    });
+  }
+
+  const { data: verifyResult, error: verifyError } = await supabase.auth.verifyOtp({
+    email: normalizedEmail,
+    token: data.code.trim(),
+    type: 'email',
+  });
+
+  if (verifyError) {
+    return { success: false, message: verifyError.message };
+  }
+
+  if (!verifyResult.user || !verifyResult.session) {
+    return { success: false, message: '验证码验证失败，请重试' };
+  }
+
+  const { data: updateResult, error: updateError } = await supabase.auth.updateUser({
+    password: data.password,
+    data: {
+      username: data.username,
+      nickname: data.nickname ?? data.username,
+    },
+  });
+
+  if (updateError) {
+    return { success: false, message: updateError.message };
+  }
+
+  const user = mapAuthUser(updateResult.user ?? verifyResult.user);
+  const token = verifyResult.session.access_token;
+  setClientAuth(token, user);
+
+  return { success: true, user, token, message: '注册成功' };
 };
 
 const fallbackRegister = async (data: RegisterData): Promise<LoginResult> => {

@@ -61,6 +61,9 @@ VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 - **ChatMessages**：只有匹配的两个用户可见
 - **QuestionnaireAnswers**：用户只能读写自己的答案
 
+### 3.3 强制校园邮箱域名
+执行 [auth-email-domain-constraint.sql](./auth-email-domain-constraint.sql) 以限制新注册账号必须使用 `@hrbeu.edu.cn` 邮箱。
+
 ## 4. 前端集成
 
 ### 4.1 安装 Supabase 包
@@ -104,6 +107,7 @@ supabase functions deploy match-scheduler
 - [ ] 项目 URL 和 API 密钥已添加到 `.env.development`
 - [ ] 数据库表已创建（10 个表）
 - [ ] RLS 策略已启用
+- [ ] 已执行邮箱域名限制脚本（仅允许 `@hrbeu.edu.cn`）
 - [ ] 前端依赖已安装
 - [ ] 本地能够注册/登录（Supabase 或本地模拟）
 - [ ] 用户资料能够正确加载和更新
