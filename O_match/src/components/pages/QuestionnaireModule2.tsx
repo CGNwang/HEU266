@@ -5,6 +5,7 @@ import { useQuestionnaireStore } from '@/store';
 import { useQuestionnaireAutoSave } from '@/hooks/useQuestionnaireAutoSave';
 import { useIncompleteQuestionPrompt } from '@/hooks/useIncompleteQuestionPrompt';
 import { QuestionnaireTopProgress } from '@/components/common/QuestionnaireTopProgress';
+import { calculateModule2Progress, calculateTotalProgress } from '@/utils/questionnaireProgress';
 
 const modules = [
   { id: 1, name: '基础画像', icon: 'person', path: '/questionnaire/1' },
@@ -38,6 +39,7 @@ const QuestionnaireModule2: React.FC = () => {
     setFormData,
     saveState,
     lastSavedAt,
+    isHydrated,
     persistNow,
   } = useQuestionnaireAutoSave<FormData>({
     moduleKey: 'module2',
@@ -58,22 +60,18 @@ const QuestionnaireModule2: React.FC = () => {
   const { incompleteHintId, focusFirstIncomplete } = useIncompleteQuestionPrompt();
 
   // 计算当前模块已完成题目数
-  const currentModuleProgress = [
-    formData.q1Schedule !== '' && formData.q1Attitude !== '',
-    formData.q2Space !== '' && formData.q2Tolerance !== '',
-    formData.q3Frequency !== '' && formData.q3Bottomline !== '',
-    formData.q4Smoking !== '' && formData.q4Bottomline !== '',
-    formData.q5Alcohol !== '' && formData.q5Bottomline !== '',
-  ].filter(Boolean).length;
+  const currentModuleProgress = calculateModule2Progress(formData);
 
   // 将当前模块进度存入 store
   React.useEffect(() => {
+    if (!isHydrated) {
+      return;
+    }
     setModuleProgress(2, currentModuleProgress);
-  }, [currentModuleProgress, setModuleProgress]);
+  }, [currentModuleProgress, isHydrated, setModuleProgress]);
 
   // 计算总进度（33题）
-  const totalQuestions = 33;
-  const totalProgress = moduleProgress.module1 + moduleProgress.module2 + moduleProgress.module3 + moduleProgress.module4 + moduleProgress.module5;
+  const totalProgress = calculateTotalProgress(moduleProgress);
 
   const updateFormData = (field: keyof FormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -97,6 +95,24 @@ const QuestionnaireModule2: React.FC = () => {
       await persistNow(formData);
       navigate(`/questionnaire/${currentModule + 1}`);
     }
+  };
+
+  const handleModuleNavigate = (nextModuleId: number) => {
+    if (nextModuleId > currentModule) {
+      const questions = [
+        { id: 'q1', completed: formData.q1Schedule !== '' && formData.q1Attitude !== '' },
+        { id: 'q2', completed: formData.q2Space !== '' && formData.q2Tolerance !== '' },
+        { id: 'q3', completed: formData.q3Frequency !== '' && formData.q3Bottomline !== '' },
+        { id: 'q4', completed: formData.q4Smoking !== '' && formData.q4Bottomline !== '' },
+        { id: 'q5', completed: formData.q5Alcohol !== '' && formData.q5Bottomline !== '' },
+      ];
+
+      if (focusFirstIncomplete(questions)) {
+        return;
+      }
+    }
+
+    navigate(`/questionnaire/${nextModuleId}`);
   };
 
   // 渲染选项卡片 - 与HTML完全一致
@@ -169,7 +185,7 @@ const QuestionnaireModule2: React.FC = () => {
         totalProgress={totalProgress}
         saveState={saveState}
         lastSavedAt={lastSavedAt}
-        onNavigate={(nextModuleId) => navigate(`/questionnaire/${nextModuleId}`)}
+        onNavigate={handleModuleNavigate}
       />
 
       {/* Survey Content Area */}

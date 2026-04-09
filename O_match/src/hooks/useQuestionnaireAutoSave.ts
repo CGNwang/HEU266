@@ -1,5 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { loadQuestionnaire, QuestionnaireAnswer, saveQuestionnaire } from '@/services/questionnaireService';
+import {
+  getQuestionnaireSnapshot,
+  loadQuestionnaire,
+  QuestionnaireAnswer,
+  saveQuestionnaireModule,
+} from '@/services/questionnaireService';
 
 export type QuestionnaireSaveState = 'idle' | 'saving' | 'saved' | 'error';
 
@@ -16,36 +21,80 @@ export const useQuestionnaireAutoSave = <T extends Record<string, unknown>>({
   initialData,
   debounceMs = 800,
 }: UseQuestionnaireAutoSaveOptions<T>) => {
-  const [formData, setFormData] = useState<T>(initialData);
-  const [saveState, setSaveState] = useState<QuestionnaireSaveState>('idle');
-  const [lastSavedAt, setLastSavedAt] = useState<number | null>(null);
+  const initialDataRef = useRef(initialData);
+  const initialSnapshotRef = useRef(getQuestionnaireSnapshot());
+  const initialModuleData = initialSnapshotRef.current?.[moduleKey] as T | undefined;
+  const initialHydrated = Boolean(initialSnapshotRef.current);
 
-  const hasHydratedRef = useRef(false);
+  const [formData, setFormData] = useState<T>(() => {
+    if (!initialModuleData) {
+      return initialDataRef.current;
+    }
+
+    return {
+      ...initialDataRef.current,
+      ...initialModuleData,
+    };
+  });
+  const [saveState, setSaveState] = useState<QuestionnaireSaveState>(() => (
+    initialSnapshotRef.current?.savedAt ? 'saved' : 'idle'
+  ));
+  const [lastSavedAt, setLastSavedAt] = useState<number | null>(
+    initialSnapshotRef.current?.savedAt ?? null
+  );
+  const [isHydrated, setIsHydrated] = useState(initialHydrated);
+
+  const hasHydratedRef = useRef(initialHydrated);
   const autoSaveTimerRef = useRef<number | null>(null);
+  const lastSavedHashRef = useRef<string | null>(
+    initialModuleData ? JSON.stringify(initialModuleData) : null
+  );
+  const saveRequestIdRef = useRef(0);
+
+  const serializeData = useCallback((data: T) => JSON.stringify(data), []);
 
   const persistNow = useCallback(
     async (nextData?: T): Promise<boolean> => {
       const dataToSave = nextData ?? formData;
+      const dataHash = serializeData(dataToSave);
+
+      if (lastSavedHashRef.current === dataHash) {
+        return true;
+      }
+
+      const requestId = ++saveRequestIdRef.current;
       setSaveState('saving');
+
       try {
-        const existingData = await loadQuestionnaire();
-        await saveQuestionnaire({
-          ...(existingData ?? {}),
-          [moduleKey]: dataToSave,
-        });
+        await saveQuestionnaireModule(
+          moduleKey,
+          dataToSave as unknown as NonNullable<QuestionnaireAnswer[typeof moduleKey]>
+        );
+
+        if (requestId !== saveRequestIdRef.current) {
+          return true;
+        }
+
+        lastSavedHashRef.current = dataHash;
         setLastSavedAt(Date.now());
         setSaveState('saved');
         return true;
       } catch {
-        setSaveState('error');
+        if (requestId === saveRequestIdRef.current) {
+          setSaveState('error');
+        }
         return false;
       }
     },
-    [formData, moduleKey]
+    [formData, moduleKey, serializeData]
   );
 
   useEffect(() => {
     let cancelled = false;
+
+    if (!hasHydratedRef.current) {
+      setIsHydrated(false);
+    }
 
     const hydrate = async () => {
       try {
@@ -61,6 +110,9 @@ export const useQuestionnaireAutoSave = <T extends Record<string, unknown>>({
             ...prev,
             ...moduleData,
           }));
+          lastSavedHashRef.current = serializeData(moduleData);
+        } else {
+          lastSavedHashRef.current = serializeData(initialDataRef.current);
         }
 
         if (existingData.savedAt) {
@@ -70,6 +122,7 @@ export const useQuestionnaireAutoSave = <T extends Record<string, unknown>>({
       } finally {
         if (!cancelled) {
           hasHydratedRef.current = true;
+          setIsHydrated(true);
         }
       }
     };
@@ -82,7 +135,7 @@ export const useQuestionnaireAutoSave = <T extends Record<string, unknown>>({
         window.clearTimeout(autoSaveTimerRef.current);
       }
     };
-  }, [moduleKey]);
+  }, [moduleKey, serializeData]);
 
   useEffect(() => {
     if (!hasHydratedRef.current) {
@@ -109,6 +162,7 @@ export const useQuestionnaireAutoSave = <T extends Record<string, unknown>>({
     setFormData,
     saveState,
     lastSavedAt,
+    isHydrated,
     persistNow,
   };
 };

@@ -5,6 +5,7 @@ import { useQuestionnaireStore } from '@/store';
 import { useQuestionnaireAutoSave } from '@/hooks/useQuestionnaireAutoSave';
 import { useIncompleteQuestionPrompt } from '@/hooks/useIncompleteQuestionPrompt';
 import { QuestionnaireTopProgress } from '@/components/common/QuestionnaireTopProgress';
+import { calculateModule3Progress, calculateTotalProgress } from '@/utils/questionnaireProgress';
 
 const modules = [
   { id: 1, name: '基础画像', icon: 'person', path: '/questionnaire/1' },
@@ -48,6 +49,7 @@ const QuestionnaireModule3: React.FC = () => {
     setFormData,
     saveState,
     lastSavedAt,
+    isHydrated,
     persistNow,
   } = useQuestionnaireAutoSave<FormData>({
     moduleKey: 'module3',
@@ -68,22 +70,18 @@ const QuestionnaireModule3: React.FC = () => {
   const { incompleteHintId, focusFirstIncomplete } = useIncompleteQuestionPrompt();
 
   // 计算当前模块已完成题目数（只有 preference 选项选择后才计入完成度）
-  const currentModuleProgress = Object.keys(formData).filter(key => {
-    const isPref = key.includes('Preference');
-    if (isPref) {
-      return formData[key as keyof FormData] !== '';
-    }
-    return false;
-  }).length;
+  const currentModuleProgress = calculateModule3Progress(formData);
 
   // 将当前模块进度存入 store
   React.useEffect(() => {
+    if (!isHydrated) {
+      return;
+    }
     setModuleProgress(3, currentModuleProgress);
-  }, [currentModuleProgress, setModuleProgress]);
+  }, [currentModuleProgress, isHydrated, setModuleProgress]);
 
   // 计算总进度（33题）
-  const totalQuestions = 33;
-  const totalProgress = moduleProgress.module1 + moduleProgress.module2 + moduleProgress.module3 + moduleProgress.module4 + moduleProgress.module5;
+  const totalProgress = calculateTotalProgress(moduleProgress);
 
   const updateFormData = (field: keyof FormData, value: number | string) => {
     // 当 slider 值改变时，同步更新 preference（如果 preference 为空）
@@ -122,6 +120,29 @@ const QuestionnaireModule3: React.FC = () => {
       await persistNow(formData);
       navigate(`/questionnaire/${currentModule + 1}`);
     }
+  };
+
+  const handleModuleNavigate = (nextModuleId: number) => {
+    if (nextModuleId > currentModule) {
+      const questions = [
+        { id: 'q1', completed: formData.q1Preference !== '' },
+        { id: 'q2', completed: formData.q2Preference !== '' },
+        { id: 'q3', completed: formData.q3Preference !== '' },
+        { id: 'q4', completed: formData.q4Preference !== '' },
+        { id: 'q5', completed: formData.q5Preference !== '' },
+        { id: 'q6', completed: formData.q6Preference !== '' },
+        { id: 'q7', completed: formData.q7Preference !== '' },
+        { id: 'q8', completed: formData.q8Preference !== '' },
+        { id: 'q9', completed: formData.q9Preference !== '' },
+        { id: 'q10', completed: formData.q10Preference !== '' },
+      ];
+
+      if (focusFirstIncomplete(questions)) {
+        return;
+      }
+    }
+
+    navigate(`/questionnaire/${nextModuleId}`);
   };
 
   // 渲染 Range Slider - 与HTML完全一致
@@ -393,7 +414,7 @@ const QuestionnaireModule3: React.FC = () => {
         totalProgress={totalProgress}
         saveState={saveState}
         lastSavedAt={lastSavedAt}
-        onNavigate={(nextModuleId) => navigate(`/questionnaire/${nextModuleId}`)}
+        onNavigate={handleModuleNavigate}
         navClassName="w-full"
       />
 

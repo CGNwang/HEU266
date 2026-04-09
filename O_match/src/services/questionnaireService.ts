@@ -15,6 +15,12 @@
 import { hasSupabaseConfig, supabase } from '@/lib/supabase';
 
 const STORAGE_KEY = 'stitch_o_match_questionnaire';
+let questionnaireCache: QuestionnaireAnswer | null = null;
+const REMOTE_SYNC_TTL_MS = 15 * 1000;
+
+let lastRemoteSyncAt = 0;
+let remoteCacheUserId: string | null = null;
+let remoteLoadPromise: Promise<QuestionnaireAnswer | null> | null = null;
 
 const MODULE_ROW_CONFIG = {
   module1: { moduleId: 'module_1', questionId: 'module_1_payload' },
@@ -35,18 +41,61 @@ interface QuestionnaireAnswerRow {
 }
 
 const readLocalQuestionnaire = (): QuestionnaireAnswer | null => {
+  if (questionnaireCache) {
+    return questionnaireCache;
+  }
+
   const stored = localStorage.getItem(STORAGE_KEY);
   if (!stored) return null;
 
   try {
-    return JSON.parse(stored);
+    questionnaireCache = JSON.parse(stored);
+    return questionnaireCache;
   } catch {
     return null;
   }
 };
 
 const writeLocalQuestionnaire = (data: QuestionnaireAnswer): void => {
+  questionnaireCache = data;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+};
+
+export const getQuestionnaireSnapshot = (): QuestionnaireAnswer | null => {
+  return readLocalQuestionnaire();
+};
+
+const resetRemoteSessionState = () => {
+  lastRemoteSyncAt = 0;
+  remoteLoadPromise = null;
+};
+
+const mergeQuestionnaireData = (data: QuestionnaireAnswer): QuestionnaireAnswer => {
+  const existingData = readLocalQuestionnaire();
+  return {
+    ...(existingData ?? {}),
+    ...data,
+    savedAt: Date.now(),
+  };
+};
+
+const upsertModuleRows = async (userId: string, rows: Array<{
+  user_id: string;
+  module_id: string;
+  question_id: string;
+  answer_value: unknown;
+}>): Promise<void> => {
+  if (!supabase || !rows.length) {
+    return;
+  }
+
+  const { error } = await supabase
+    .from('questionnaire_answers')
+    .upsert(rows, { onConflict: 'user_id,question_id' });
+
+  if (error) {
+    throw error;
+  }
 };
 
 const getAuthenticatedUserId = async (): Promise<string | null> => {
@@ -302,26 +351,15 @@ export interface QuestionnaireAnswer {
  * ```
  */
 export const saveQuestionnaire = async (data: QuestionnaireAnswer): Promise<void> => {
-  const existingData = await loadQuestionnaire();
-  const mergedData = {
-    ...(existingData ?? {}),
-    ...data,
-    savedAt: Date.now(),
-  };
+  const mergedData = mergeQuestionnaireData(data);
 
   const userId = await getAuthenticatedUserId();
   if (userId && supabase) {
     try {
+      remoteCacheUserId = userId;
       const rows = buildRowsFromAnswer(userId, mergedData);
-      if (rows.length > 0) {
-        const { error } = await supabase
-          .from('questionnaire_answers')
-          .upsert(rows, { onConflict: 'user_id,question_id' });
-
-        if (error) {
-          throw error;
-        }
-      }
+      await upsertModuleRows(userId, rows);
+      lastRemoteSyncAt = Date.now();
     } catch (error) {
       console.error('问卷远端保存失败，已回退到本地缓存:', error);
     }
@@ -330,6 +368,34 @@ export const saveQuestionnaire = async (data: QuestionnaireAnswer): Promise<void
   writeLocalQuestionnaire(mergedData);
 
   console.log('问卷已保存', userId ? '(Supabase + localStorage)' : '(localStorage)', mergedData);
+};
+
+export const saveQuestionnaireModule = async <K extends ModuleKey>(
+  moduleKey: K,
+  moduleData: NonNullable<QuestionnaireAnswer[K]>
+): Promise<void> => {
+  const mergedData = mergeQuestionnaireData({
+    [moduleKey]: moduleData,
+  } as Pick<QuestionnaireAnswer, K> as QuestionnaireAnswer);
+
+  const userId = await getAuthenticatedUserId();
+  if (userId && supabase) {
+    try {
+      remoteCacheUserId = userId;
+      const config = MODULE_ROW_CONFIG[moduleKey];
+      await upsertModuleRows(userId, [{
+        user_id: userId,
+        module_id: config.moduleId,
+        question_id: config.questionId,
+        answer_value: moduleData,
+      }]);
+      lastRemoteSyncAt = Date.now();
+    } catch (error) {
+      console.error('问卷模块远端保存失败，已回退到本地缓存:', error);
+    }
+  }
+
+  writeLocalQuestionnaire(mergedData);
 };
 
 /**
@@ -348,10 +414,27 @@ export const saveQuestionnaire = async (data: QuestionnaireAnswer): Promise<void
  */
 export const loadQuestionnaire = async (): Promise<QuestionnaireAnswer | null> => {
   try {
+    const localData = readLocalQuestionnaire();
     const userId = await getAuthenticatedUserId();
-    if (userId) {
+    if (userId && supabase) {
+      if (remoteCacheUserId !== userId) {
+        remoteCacheUserId = userId;
+        resetRemoteSessionState();
+      }
+
+      if (localData && Date.now() - lastRemoteSyncAt < REMOTE_SYNC_TTL_MS) {
+        return localData;
+      }
+
       try {
-        const remoteData = await loadFromSupabase(userId);
+        if (!remoteLoadPromise) {
+          remoteLoadPromise = loadFromSupabase(userId).finally(() => {
+            remoteLoadPromise = null;
+          });
+        }
+
+        const remoteData = await remoteLoadPromise;
+        lastRemoteSyncAt = Date.now();
         if (remoteData) {
           writeLocalQuestionnaire(remoteData);
           return remoteData;
@@ -359,9 +442,12 @@ export const loadQuestionnaire = async (): Promise<QuestionnaireAnswer | null> =
       } catch (error) {
         console.error('问卷远端加载失败，尝试读取本地缓存:', error);
       }
+    } else {
+      remoteCacheUserId = null;
+      resetRemoteSessionState();
     }
 
-    return readLocalQuestionnaire();
+    return localData;
   } catch {
     return readLocalQuestionnaire();
   }
@@ -401,6 +487,9 @@ export const clearQuestionnaire = async (): Promise<void> => {
     }
   }
 
+  questionnaireCache = null;
+  remoteCacheUserId = null;
+  resetRemoteSessionState();
   localStorage.removeItem(STORAGE_KEY);
   console.log('问卷数据已清除');
 };

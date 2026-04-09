@@ -5,6 +5,7 @@ import { useQuestionnaireStore } from '@/store';
 import { useQuestionnaireAutoSave } from '@/hooks/useQuestionnaireAutoSave';
 import { useIncompleteQuestionPrompt } from '@/hooks/useIncompleteQuestionPrompt';
 import { QuestionnaireTopProgress } from '@/components/common/QuestionnaireTopProgress';
+import { calculateModule1Progress, calculateTotalProgress } from '@/utils/questionnaireProgress';
 
 const modules = [
   { id: 1, name: '基础画像', icon: 'person', path: '/questionnaire/1' },
@@ -30,6 +31,7 @@ const QuestionnairePage: React.FC = () => {
     setFormData,
     saveState,
     lastSavedAt,
+    isHydrated,
     persistNow,
   } = useQuestionnaireAutoSave({
     moduleKey: 'module1',
@@ -45,21 +47,18 @@ const QuestionnairePage: React.FC = () => {
   const { incompleteHintId, focusFirstIncomplete } = useIncompleteQuestionPrompt();
 
   // 计算当前模块已完成题目数
-  const currentModuleProgress = [
-    formData.gender !== '',
-    formData.expectedGender !== '',
-    formData.stage !== '',
-    formData.partnerStages.length > 0,
-    formData.locations.length > 0,
-  ].filter(Boolean).length;
+  const currentModuleProgress = calculateModule1Progress(formData);
 
   // 将当前模块进度存入 store
   React.useEffect(() => {
+    if (!isHydrated) {
+      return;
+    }
     setModuleProgress(1, currentModuleProgress);
-  }, [currentModuleProgress, setModuleProgress]);
+  }, [currentModuleProgress, isHydrated, setModuleProgress]);
 
   // 计算总进度（33题）
-  const totalProgress = moduleProgress.module1 + moduleProgress.module2 + moduleProgress.module3 + moduleProgress.module4 + moduleProgress.module5;
+  const totalProgress = calculateTotalProgress(moduleProgress);
 
   const updateFormData = (field: string, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -118,6 +117,24 @@ const QuestionnairePage: React.FC = () => {
     }
   };
 
+  const handleModuleNavigate = (nextModuleId: number) => {
+    if (nextModuleId > currentModule) {
+      const questions = [
+        { id: 'q1', completed: formData.gender !== '' },
+        { id: 'q2', completed: formData.expectedGender !== '' },
+        { id: 'q3', completed: formData.stage !== '' },
+        { id: 'q4', completed: formData.partnerStages.length > 0 },
+        { id: 'q5', completed: formData.locations.length > 0 },
+      ];
+
+      if (focusFirstIncomplete(questions)) {
+        return;
+      }
+    }
+
+    navigate(`/questionnaire/${nextModuleId}`);
+  };
+
   const getModuleTitle = () => {
     const module = modules.find((m) => m.id === currentModule);
     return module?.name || '基础画像';
@@ -132,7 +149,7 @@ const QuestionnairePage: React.FC = () => {
         totalProgress={totalProgress}
         saveState={saveState}
         lastSavedAt={lastSavedAt}
-        onNavigate={(nextModuleId) => navigate(`/questionnaire/${nextModuleId}`)}
+        onNavigate={handleModuleNavigate}
       />
 
       {/* Survey Content Area */}

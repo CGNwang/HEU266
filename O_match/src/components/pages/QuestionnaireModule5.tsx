@@ -6,6 +6,7 @@ import { joinMatching } from '@/services/matchingService';
 import { useQuestionnaireAutoSave } from '@/hooks/useQuestionnaireAutoSave';
 import { useIncompleteQuestionPrompt } from '@/hooks/useIncompleteQuestionPrompt';
 import { QuestionnaireTopProgress } from '@/components/common/QuestionnaireTopProgress';
+import { calculateModule5Progress, calculateTotalProgress } from '@/utils/questionnaireProgress';
 
 const modules = [
   { id: 1, name: '基础画像', icon: 'person', path: '/questionnaire/1' },
@@ -36,6 +37,7 @@ const QuestionnaireModule5: React.FC = () => {
     setFormData,
     saveState,
     lastSavedAt,
+    isHydrated,
     persistNow,
   } = useQuestionnaireAutoSave<FormData>({
     moduleKey: 'module5',
@@ -53,24 +55,18 @@ const QuestionnaireModule5: React.FC = () => {
   const { incompleteHintId, focusFirstIncomplete } = useIncompleteQuestionPrompt();
 
   // 计算当前模块已完成题目数
-  const currentModuleProgress = [
-    formData.q1 !== '',
-    formData.q2.length > 0,
-    formData.q3 !== '',
-    formData.q4 !== '',
-    formData.q5 !== '',
-    formData.q6 !== '',
-    formData.q7.length > 0,
-  ].filter(Boolean).length;
+  const currentModuleProgress = calculateModule5Progress(formData);
 
   // 将当前模块进度存入 store
   React.useEffect(() => {
+    if (!isHydrated) {
+      return;
+    }
     setModuleProgress(5, currentModuleProgress);
-  }, [currentModuleProgress, setModuleProgress]);
+  }, [currentModuleProgress, isHydrated, setModuleProgress]);
 
   // 计算总进度（33题）
-  const totalQuestions = 33;
-  const totalProgress = moduleProgress.module1 + moduleProgress.module2 + moduleProgress.module3 + moduleProgress.module4 + moduleProgress.module5;
+  const totalProgress = calculateTotalProgress(moduleProgress);
 
   const updateFormData = (field: keyof FormData, value: string | string[]) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
