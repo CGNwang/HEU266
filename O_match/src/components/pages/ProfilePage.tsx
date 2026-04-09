@@ -5,6 +5,7 @@ import { logout as logoutService } from '@/services/authService';
 
 const ProfilePage: React.FC = () => {
   const navigate = useNavigate();
+  const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
 
   const handleLogout = async () => {
@@ -36,10 +37,10 @@ const ProfilePage: React.FC = () => {
           </div>
 
           <div className="flex-1 text-center md:text-left">
-            <h1 className="font-headline text-4xl font-extrabold tracking-tight text-on-surface mb-2">你好，同学</h1>
+            <h1 className="font-headline text-4xl font-extrabold tracking-tight text-on-surface mb-2">遇见你的校园缘分💌</h1>
             <p className="text-on-surface-variant font-medium mb-6 flex items-center justify-center md:justify-start gap-2">
               <span className="material-symbols-outlined text-lg">mail</span>
-              @hrbeu.edu.cn
+              {user?.email || '未获取到邮箱'}
             </p>
           </div>
         </div>

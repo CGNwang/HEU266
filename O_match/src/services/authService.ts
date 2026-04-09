@@ -44,6 +44,11 @@ export interface ResetPasswordResult {
   message?: string;
 }
 
+export interface DeleteAccountResult {
+  success: boolean;
+  message?: string;
+}
+
 interface MockStoredUser {
   username: string;
   password: string;
@@ -421,6 +426,35 @@ export const resetPassword = async (newPassword: string): Promise<ResetPasswordR
   }
 
   return { success: true, message: '密码已更新' };
+};
+
+export const deleteAccount = async (): Promise<DeleteAccountResult> => {
+  if (!hasSupabaseConfig || !supabase) {
+    const currentUser = useAuthStore.getState().user;
+    if (currentUser?.email) {
+      const users = readMockUsers().filter((item) => item.email !== currentUser.email);
+      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(users));
+    }
+    clearClientAuth();
+    return { success: true, message: '账号已注销' };
+  }
+
+  const { data: userResult, error: userError } = await supabase.auth.getUser();
+  if (userError || !userResult.user) {
+    return { success: false, message: '当前登录状态已失效，请重新登录后重试' };
+  }
+
+  const { error: rpcError } = await supabase.rpc('delete_my_account');
+  if (rpcError) {
+    return {
+      success: false,
+      message: '注销失败：请先在 Supabase 中创建 delete_my_account 函数并授予 authenticated 调用权限',
+    };
+  }
+
+  await supabase.auth.signOut();
+  clearClientAuth();
+  return { success: true, message: '账号已注销' };
 };
 
 export const getCurrentUser = async (): Promise<User | null> => {

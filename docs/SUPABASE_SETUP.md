@@ -64,6 +64,9 @@ VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ### 3.3 强制校园邮箱域名
 执行 [auth-email-domain-constraint.sql](./auth-email-domain-constraint.sql) 以限制新注册账号必须使用 `@hrbeu.edu.cn` 邮箱。
 
+### 3.4 开启账号注销 RPC（前端“注销账号”按钮）
+执行 [delete-account-function.sql](./delete-account-function.sql) 以允许已登录用户通过 RPC `delete_my_account` 注销自己的账号。
+
 ## 4. 前端集成
 
 ### 4.1 安装 Supabase 包
@@ -108,6 +111,7 @@ supabase functions deploy match-scheduler
 - [ ] 数据库表已创建（10 个表）
 - [ ] RLS 策略已启用
 - [ ] 已执行邮箱域名限制脚本（仅允许 `@hrbeu.edu.cn`）
+- [ ] 已执行账号注销函数脚本（`delete_my_account`）
 - [ ] 前端依赖已安装
 - [ ] 本地能够注册/登录（Supabase 或本地模拟）
 - [ ] 用户资料能够正确加载和更新
