@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { cn } from '@/utils';
 import { useQuestionnaireStore } from '@/store';
-import { saveQuestionnaire, loadQuestionnaire } from '@/services/questionnaireService';
 import { joinMatching } from '@/services/matchingService';
+import { useQuestionnaireAutoSave } from '@/hooks/useQuestionnaireAutoSave';
+import { useIncompleteQuestionPrompt } from '@/hooks/useIncompleteQuestionPrompt';
+import { QuestionnaireTopProgress } from '@/components/common/QuestionnaireTopProgress';
 
 const modules = [
   { id: 1, name: '基础画像', icon: 'person', path: '/questionnaire/1' },
@@ -29,18 +31,26 @@ const QuestionnaireModule5: React.FC = () => {
   const currentModule = moduleId ? parseInt(moduleId) : 5;
   const { moduleProgress, setModuleProgress } = useQuestionnaireStore();
 
-  const [formData, setFormData] = useState<FormData>({
-    q1: '',
-    q2: [],
-    q3: '',
-    q4: '',
-    q5: '',
-    q6: '',
-    q7: [],
+  const {
+    formData,
+    setFormData,
+    saveState,
+    lastSavedAt,
+    persistNow,
+  } = useQuestionnaireAutoSave<FormData>({
+    moduleKey: 'module5',
+    initialData: {
+      q1: '',
+      q2: [],
+      q3: '',
+      q4: '',
+      q5: '',
+      q6: '',
+      q7: [],
+    },
   });
 
-  // 记录需要提示的未完成题目ID
-  const [incompleteHintId, setIncompleteHintId] = useState<string | null>(null);
+  const { incompleteHintId, focusFirstIncomplete } = useIncompleteQuestionPrompt();
 
   // 计算当前模块已完成题目数
   const currentModuleProgress = [
@@ -214,45 +224,43 @@ const QuestionnaireModule5: React.FC = () => {
     },
   ];
 
+  const handleCompleteAndMatch = async () => {
+    // 找到第一个未完成的题目
+    const requiredQuestions = [
+      { id: 'q1', completed: formData.q1 !== '' },
+      { id: 'q2', completed: formData.q2.length > 0 },
+      { id: 'q3', completed: formData.q3 !== '' },
+      { id: 'q4', completed: formData.q4 !== '' },
+      { id: 'q5', completed: formData.q5 !== '' },
+      { id: 'q6', completed: formData.q6 !== '' },
+      { id: 'q7', completed: formData.q7.length > 0 },
+    ];
+
+    if (focusFirstIncomplete(requiredQuestions)) {
+      return;
+    }
+
+    const saved = await persistNow(formData);
+    if (!saved) {
+      alert('提交前保存失败，请稍后重试');
+      return;
+    }
+
+    await joinMatching();
+    navigate('/waiting');
+  };
+
   return (
     <main className="pt-12 pb-32 px-4 max-w-3xl mx-auto min-h-[1024px]">
       {/* Sticky Progress Bar & Section Navigation */}
-      <div className="sticky top-20 z-50 bg-[#fdf9f3] pt-4 pb-4 -mx-4 px-4 -mt-4">
-        {/* Progress Bar Section */}
-        <div className="flex items-center justify-between mb-4 gap-6">
-          <div className="w-full">
-            <div className="flex justify-between items-end mb-2">
-              <span className="text-on-surface-variant text-sm font-semibold">问卷完成度</span>
-              <span className="text-primary font-bold">{totalProgress}/33</span>
-            </div>
-            <div className="h-2 w-full bg-surface-container-high rounded-full overflow-hidden">
-              <div
-                className="h-full bg-primary-container rounded-full shadow-[0_0_8px_rgba(246,138,47,0.4)] transition-[width] duration-500 ease-out"
-                style={{ width: `${(totalProgress / 33) * 100}%` }}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Section Navigation */}
-        <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar items-center -mb-2">
-          {modules.map((module) => (
-            <button
-              key={module.id}
-              onClick={() => navigate(`/questionnaire/${module.id}`)}
-              className={cn(
-                'whitespace-nowrap flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium transition-colors',
-                currentModule === module.id
-                  ? 'bg-[#ffdbcd] text-[#a23f00] shadow-sm'
-                  : 'text-on-surface-variant hover:bg-surface-container-low'
-              )}
-            >
-              <span className="material-symbols-outlined text-lg">{module.icon}</span>
-              {module.name}
-            </button>
-          ))}
-        </div>
-      </div>
+      <QuestionnaireTopProgress
+        modules={modules}
+        currentModule={currentModule}
+        totalProgress={totalProgress}
+        saveState={saveState}
+        lastSavedAt={lastSavedAt}
+        onNavigate={(nextModuleId) => navigate(`/questionnaire/${nextModuleId}`)}
+      />
 
       {/* Survey Content Area */}
       <section className="space-y-12">
@@ -307,73 +315,10 @@ const QuestionnaireModule5: React.FC = () => {
         {/* Action Area */}
         <div className="pt-12 flex justify-center flex-col items-center gap-4">
           <button
-            onClick={async () => {
-              // 找到第一个未完成的题目
-              const questions = [
-                { id: 'q1', completed: formData.q1 !== '' },
-                { id: 'q2', completed: formData.q2.length > 0 },
-                { id: 'q3', completed: formData.q3 !== '' },
-                { id: 'q4', completed: formData.q4 !== '' },
-                { id: 'q5', completed: formData.q5 !== '' },
-                { id: 'q6', completed: formData.q6 !== '' },
-                { id: 'q7', completed: formData.q7.length > 0 },
-              ];
-
-              const firstIncomplete = questions.find(q => !q.completed);
-
-              if (firstIncomplete) {
-                const element = document.getElementById(firstIncomplete.id);
-                if (element) {
-                  const headerOffset = 260;
-                  const elementPosition = element.getBoundingClientRect().top;
-                  const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-
-                  window.scrollTo({
-                    top: offsetPosition,
-                    behavior: 'smooth'
-                  });
-                }
-
-                // 设置提示并持续5秒
-                setIncompleteHintId(firstIncomplete.id);
-                setTimeout(() => {
-                  setIncompleteHintId(null);
-                }, 5000);
-                return;
-              }
-
-              // 所有题目已完成，保存问卷并参与匹配
-              const existingData5 = await loadQuestionnaire();
-              await saveQuestionnaire({
-                ...existingData5,
-                module5: formData,
-              });
-
-              // TODO: 调用后端 API 提交最终问卷
-              // await submitQuestionnaire();
-
-              // 参与本周匹配（调用后端 API）
-              await joinMatching();
-
-              // 跳转到等待页面
-              navigate('/waiting');
-            }}
+            onClick={handleCompleteAndMatch}
             className="w-full py-5 rounded-full bg-gradient-to-br from-[#F28C38] to-[#f68a2f] text-white font-black tracking-widest text-lg shadow-xl shadow-[#F28C38]/30 active:scale-95 transition-all"
           >
             完成并参与本周匹配
-          </button>
-          <button
-            onClick={async () => {
-              const existingData = await loadQuestionnaire();
-              await saveQuestionnaire({
-                ...existingData,
-                module5: formData,
-              });
-              alert('进度已保存！');
-            }}
-            className="w-full py-5 rounded-full bg-surface-container-high text-on-surface font-black tracking-widest text-lg active:scale-95 transition-all"
-          >
-            暂存进度
           </button>
         </div>
       </section>

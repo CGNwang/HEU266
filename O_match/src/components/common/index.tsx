@@ -1,5 +1,7 @@
 import React from 'react';
 import { cn } from '@/utils';
+export { QuestionnaireSaveStatus } from './QuestionnaireSaveStatus';
+export { QuestionnaireTopProgress } from './QuestionnaireTopProgress';
 
 interface GlassCardProps {
   children: React.ReactNode;

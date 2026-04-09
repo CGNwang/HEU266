@@ -12,7 +12,129 @@
  * DELETE /api/questionnaire/clear - 清除保存的问卷
  */
 
+import { hasSupabaseConfig, supabase } from '@/lib/supabase';
+
 const STORAGE_KEY = 'stitch_o_match_questionnaire';
+
+const MODULE_ROW_CONFIG = {
+  module1: { moduleId: 'module_1', questionId: 'module_1_payload' },
+  module2: { moduleId: 'module_2', questionId: 'module_2_payload' },
+  module3: { moduleId: 'module_3', questionId: 'module_3_payload' },
+  module4: { moduleId: 'module_4', questionId: 'module_4_payload' },
+  module5: { moduleId: 'module_5', questionId: 'module_5_payload' },
+} as const;
+
+type ModuleKey = keyof typeof MODULE_ROW_CONFIG;
+
+interface QuestionnaireAnswerRow {
+  module_id: string;
+  question_id: string;
+  answer_value: unknown;
+  updated_at?: string;
+  created_at?: string;
+}
+
+const readLocalQuestionnaire = (): QuestionnaireAnswer | null => {
+  const stored = localStorage.getItem(STORAGE_KEY);
+  if (!stored) return null;
+
+  try {
+    return JSON.parse(stored);
+  } catch {
+    return null;
+  }
+};
+
+const writeLocalQuestionnaire = (data: QuestionnaireAnswer): void => {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+};
+
+const getAuthenticatedUserId = async (): Promise<string | null> => {
+  if (!hasSupabaseConfig || !supabase) return null;
+
+  const { data, error } = await supabase.auth.getUser();
+  if (error || !data.user) return null;
+  return data.user.id;
+};
+
+const buildRowsFromAnswer = (userId: string, data: QuestionnaireAnswer) => {
+  const rows: Array<{
+    user_id: string;
+    module_id: string;
+    question_id: string;
+    answer_value: unknown;
+  }> = [];
+
+  (Object.keys(MODULE_ROW_CONFIG) as ModuleKey[]).forEach((moduleKey) => {
+    const moduleData = data[moduleKey];
+    if (!moduleData) return;
+
+    const config = MODULE_ROW_CONFIG[moduleKey];
+    rows.push({
+      user_id: userId,
+      module_id: config.moduleId,
+      question_id: config.questionId,
+      answer_value: moduleData,
+    });
+  });
+
+  return rows;
+};
+
+const mapRowsToQuestionnaire = (rows: QuestionnaireAnswerRow[]): QuestionnaireAnswer | null => {
+  if (!rows.length) return null;
+
+  const result: QuestionnaireAnswer = {};
+  let latestSavedAt = 0;
+
+  rows.forEach((row) => {
+    const moduleEntry = (Object.entries(MODULE_ROW_CONFIG) as Array<[ModuleKey, (typeof MODULE_ROW_CONFIG)[ModuleKey]]>)
+      .find(([, config]) => config.questionId === row.question_id || config.moduleId === row.module_id);
+
+    if (!moduleEntry) return;
+
+    const [moduleKey] = moduleEntry;
+    (result as Record<string, unknown>)[moduleKey] = row.answer_value;
+
+    const timestampSource = row.updated_at ?? row.created_at;
+    if (timestampSource) {
+      const ts = new Date(timestampSource).getTime();
+      if (!Number.isNaN(ts) && ts > latestSavedAt) {
+        latestSavedAt = ts;
+      }
+    }
+  });
+
+  if (!Object.keys(result).length) {
+    return null;
+  }
+
+  if (latestSavedAt > 0) {
+    result.savedAt = latestSavedAt;
+  }
+
+  return result;
+};
+
+const loadFromSupabase = async (userId: string): Promise<QuestionnaireAnswer | null> => {
+  if (!supabase) return null;
+
+  const payloadQuestionIds = (Object.values(MODULE_ROW_CONFIG) as Array<(typeof MODULE_ROW_CONFIG)[ModuleKey]>).map(
+    (item) => item.questionId
+  );
+
+  const { data, error } = await supabase
+    .from('questionnaire_answers')
+    .select('module_id, question_id, answer_value, updated_at, created_at')
+    .eq('user_id', userId)
+    .in('question_id', payloadQuestionIds);
+
+  if (error) {
+    throw error;
+  }
+
+  return mapRowsToQuestionnaire((data ?? []) as QuestionnaireAnswerRow[]);
+};
 
 const isModule1Complete = (module1: QuestionnaireAnswer['module1']): boolean =>
   Boolean(
@@ -180,24 +302,34 @@ export interface QuestionnaireAnswer {
  * ```
  */
 export const saveQuestionnaire = async (data: QuestionnaireAnswer): Promise<void> => {
-  // TODO: 对接后端 API
-  // const response = await fetch('/api/questionnaire/save', {
-  //   method: 'POST',
-  //   headers: { 'Content-Type': 'application/json' },
-  //   body: JSON.stringify({ ...data, savedAt: Date.now() })
-  // });
-
-  // 当前使用 localStorage 实现
-  const existingData = loadQuestionnaire();
+  const existingData = await loadQuestionnaire();
   const mergedData = {
-    ...existingData,
+    ...(existingData ?? {}),
     ...data,
     savedAt: Date.now(),
   };
 
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(mergedData));
+  const userId = await getAuthenticatedUserId();
+  if (userId && supabase) {
+    try {
+      const rows = buildRowsFromAnswer(userId, mergedData);
+      if (rows.length > 0) {
+        const { error } = await supabase
+          .from('questionnaire_answers')
+          .upsert(rows, { onConflict: 'user_id,question_id' });
 
-  console.log('问卷已保存 (localStorage)', mergedData);
+        if (error) {
+          throw error;
+        }
+      }
+    } catch (error) {
+      console.error('问卷远端保存失败，已回退到本地缓存:', error);
+    }
+  }
+
+  writeLocalQuestionnaire(mergedData);
+
+  console.log('问卷已保存', userId ? '(Supabase + localStorage)' : '(localStorage)', mergedData);
 };
 
 /**
@@ -215,19 +347,23 @@ export const saveQuestionnaire = async (data: QuestionnaireAnswer): Promise<void
  * ```
  */
 export const loadQuestionnaire = async (): Promise<QuestionnaireAnswer | null> => {
-  // TODO: 对接后端 API
-  // const response = await fetch('/api/questionnaire/load');
-  // if (!response.ok) return null;
-  // return response.json();
-
-  // 当前使用 localStorage 实现
-  const stored = localStorage.getItem(STORAGE_KEY);
-  if (!stored) return null;
-
   try {
-    return JSON.parse(stored);
+    const userId = await getAuthenticatedUserId();
+    if (userId) {
+      try {
+        const remoteData = await loadFromSupabase(userId);
+        if (remoteData) {
+          writeLocalQuestionnaire(remoteData);
+          return remoteData;
+        }
+      } catch (error) {
+        console.error('问卷远端加载失败，尝试读取本地缓存:', error);
+      }
+    }
+
+    return readLocalQuestionnaire();
   } catch {
-    return null;
+    return readLocalQuestionnaire();
   }
 };
 
@@ -244,10 +380,27 @@ export const loadQuestionnaire = async (): Promise<QuestionnaireAnswer | null> =
  * ```
  */
 export const clearQuestionnaire = async (): Promise<void> => {
-  // TODO: 对接后端 API
-  // await fetch('/api/questionnaire/clear', { method: 'DELETE' });
+  const userId = await getAuthenticatedUserId();
+  if (userId && supabase) {
+    try {
+      const payloadQuestionIds = (Object.values(MODULE_ROW_CONFIG) as Array<(typeof MODULE_ROW_CONFIG)[ModuleKey]>).map(
+        (item) => item.questionId
+      );
 
-  // 当前使用 localStorage 实现
+      const { error } = await supabase
+        .from('questionnaire_answers')
+        .delete()
+        .eq('user_id', userId)
+        .in('question_id', payloadQuestionIds);
+
+      if (error) {
+        throw error;
+      }
+    } catch (error) {
+      console.error('问卷远端清除失败，继续清除本地缓存:', error);
+    }
+  }
+
   localStorage.removeItem(STORAGE_KEY);
   console.log('问卷数据已清除');
 };
@@ -257,8 +410,8 @@ export const clearQuestionnaire = async (): Promise<void> => {
  *
  * @returns 字符串，包含保存时间和完成进度
  */
-export const getSaveStatus = (): string => {
-  const data = loadQuestionnaire();
+export const getSaveStatus = async (): Promise<string> => {
+  const data = await loadQuestionnaire();
   if (!data?.savedAt) return '';
 
   const date = new Date(data.savedAt);
