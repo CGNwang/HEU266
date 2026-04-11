@@ -10,6 +10,8 @@ const INVALID_CREDENTIAL_MESSAGE = '账号或密码错误';
 const HRBEU_EMAIL_SUFFIX = '@hrbeu.edu.cn';
 const HRBEU_EMAIL_MESSAGE = '仅支持 HEU 校园邮箱';
 const RESET_PASSWORD_COOLDOWN_MESSAGE = '发送过于频繁，请稍后再试';
+const RESET_PASSWORD_SAME_AS_OLD_MESSAGE = '新密码不能与旧密码相同，请换一个新密码';
+const PASSWORD_POLICY_MESSAGE = '密码不符合要求，请重新设置';
 
 const normalizeResetPasswordError = (message?: string): string => {
   if (!message) {
@@ -17,6 +19,17 @@ const normalizeResetPasswordError = (message?: string): string => {
   }
 
   const normalized = message.toLowerCase();
+  if (
+    normalized.includes('same as the old password') ||
+    normalized.includes('same as old password') ||
+    normalized.includes('should be different from the old password') ||
+    normalized.includes('password should be different') ||
+    normalized.includes('new password cannot be the same') ||
+    normalized.includes('identical to the old password')
+  ) {
+    return RESET_PASSWORD_SAME_AS_OLD_MESSAGE;
+  }
+
   if (
     normalized.includes('rate limit') ||
     normalized.includes('too many requests') ||
@@ -28,6 +41,38 @@ const normalizeResetPasswordError = (message?: string): string => {
   }
 
   return '发送失败，请稍后重试';
+};
+
+const normalizePasswordUpdateError = (message?: string): string => {
+  if (!message) {
+    return '重置失败，请稍后重试';
+  }
+
+  const normalized = message.toLowerCase();
+  if (
+    normalized.includes('same as the old password') ||
+    normalized.includes('same as old password') ||
+    normalized.includes('should be different from the old password') ||
+    normalized.includes('password should be different') ||
+    normalized.includes('new password cannot be the same') ||
+    normalized.includes('identical to the old password')
+  ) {
+    return RESET_PASSWORD_SAME_AS_OLD_MESSAGE;
+  }
+
+  if (
+    normalized.includes('password should be at least') ||
+    normalized.includes('password is too short') ||
+    normalized.includes('password too short') ||
+    normalized.includes('weak password') ||
+    normalized.includes('password strength') ||
+    normalized.includes('validation failed') ||
+    normalized.includes('must be at least')
+  ) {
+    return PASSWORD_POLICY_MESSAGE;
+  }
+
+  return '重置失败，请稍后重试';
 };
 
 export interface LoginResult {
@@ -252,7 +297,7 @@ export const registerWithEmailCode = async (data: RegisterWithCodeData): Promise
   });
 
   if (updateError) {
-    return { success: false, message: updateError.message };
+    return { success: false, message: normalizePasswordUpdateError(updateError.message) };
   }
 
   const user = mapAuthUser(updateResult.user ?? verifyResult.user);
@@ -442,7 +487,7 @@ export const resetPassword = async (newPassword: string): Promise<ResetPasswordR
   });
 
   if (error) {
-    return { success: false, message: error.message };
+    return { success: false, message: normalizePasswordUpdateError(error.message) };
   }
 
   return { success: true, message: '密码已更新' };
