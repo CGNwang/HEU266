@@ -9,6 +9,26 @@ const OTP_STORAGE_KEY = 'stitch_o_match_register_otp';
 const INVALID_CREDENTIAL_MESSAGE = '账号或密码错误';
 const HRBEU_EMAIL_SUFFIX = '@hrbeu.edu.cn';
 const HRBEU_EMAIL_MESSAGE = '仅支持 HEU 校园邮箱';
+const RESET_PASSWORD_COOLDOWN_MESSAGE = '发送过于频繁，请稍后再试';
+
+const normalizeResetPasswordError = (message?: string): string => {
+  if (!message) {
+    return '发送失败，请稍后重试';
+  }
+
+  const normalized = message.toLowerCase();
+  if (
+    normalized.includes('rate limit') ||
+    normalized.includes('too many requests') ||
+    normalized.includes('over_email_send_rate') ||
+    normalized.includes('email send rate') ||
+    normalized.includes('security purposes')
+  ) {
+    return RESET_PASSWORD_COOLDOWN_MESSAGE;
+  }
+
+  return '发送失败，请稍后重试';
+};
 
 export interface LoginResult {
   success: boolean;
@@ -406,7 +426,7 @@ export const sendPasswordResetEmail = async (email: string): Promise<SendCodeRes
   });
 
   if (error) {
-    return { success: false, message: error.message };
+    return { success: false, message: normalizeResetPasswordError(error.message) };
   }
 
   return { success: true, message: '重置密码邮件已发送，请前往邮箱查收' };
