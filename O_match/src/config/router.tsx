@@ -1,25 +1,31 @@
-import { useEffect } from 'react';
+import { Suspense, lazy, useEffect } from 'react';
+import type { ComponentType, LazyExoticComponent } from 'react';
 import { createBrowserRouter, Navigate, Outlet, useLocation } from 'react-router-dom';
 import { Layout } from '@/components/layout';
-import {
-  HomePage,
-  LoginPage,
-  RegisterPage,
-  ForgotPasswordPage,
-  ResetPasswordPage,
-  ChangePasswordPage,
-  WaitingPage,
-  MatchSuccessPage,
-  MatchFailPage,
-  MatchReportPage,
-  ChatRoomPage,
-  QuestionnairePage,
-  ProfilePage,
-  QuestionnaireRequiredPage,
-  SecurityPage,
-  BindInfoPage,
-  DonatePage,
-} from '@/components/pages';
+
+const HomePage = lazy(() => import('@/components/pages/HomePage'));
+const LoginPage = lazy(() => import('@/components/pages/LoginPage'));
+const RegisterPage = lazy(() => import('@/components/pages/RegisterPage'));
+const ForgotPasswordPage = lazy(() => import('@/components/pages/ForgotPasswordPage'));
+const ResetPasswordPage = lazy(() => import('@/components/pages/ResetPasswordPage'));
+const ChangePasswordPage = lazy(() => import('@/components/pages/ChangePasswordPage'));
+const WaitingPage = lazy(() => import('@/components/pages/WaitingPage'));
+const MatchSuccessPage = lazy(() => import('@/components/pages/MatchSuccessPage'));
+const MatchFailPage = lazy(() => import('@/components/pages/MatchFailPage'));
+const MatchReportPage = lazy(() => import('@/components/pages/MatchReportPage'));
+const ChatRoomPage = lazy(() => import('@/components/pages/ChatRoomPage'));
+const QuestionnairePage = lazy(() => import('@/components/pages/QuestionnaireWrapper'));
+const ProfilePage = lazy(() => import('@/components/pages/ProfilePage'));
+const QuestionnaireRequiredPage = lazy(() => import('@/components/pages/QuestionnaireRequiredPage'));
+const SecurityPage = lazy(() => import('@/components/pages/SecurityPage'));
+const BindInfoPage = lazy(() => import('@/components/pages/BindInfoPage'));
+const DonatePage = lazy(() => import('@/components/pages/DonatePage'));
+
+const renderLazy = (Component: LazyExoticComponent<ComponentType>) => (
+  <Suspense fallback={<div className="min-h-screen flex items-center justify-center text-on-surface-variant">加载中...</div>}>
+    <Component />
+  </Suspense>
+);
 
 const ScrollToTopOnNavigate = () => {
   const { pathname, search } = useLocation();
@@ -42,77 +48,77 @@ export const router = createBrowserRouter([
         children: [
           {
             index: true,
-            element: <HomePage />,
+            element: renderLazy(HomePage),
           },
           {
             path: 'questionnaire',
-            element: <QuestionnairePage />,
+            element: renderLazy(QuestionnairePage),
           },
           {
             path: 'questionnaire/:moduleId',
-            element: <QuestionnairePage />,
+            element: renderLazy(QuestionnairePage),
           },
           {
             path: 'waiting',
-            element: <WaitingPage />,
+            element: renderLazy(WaitingPage),
           },
           {
             path: 'questionnaire-required',
-            element: <QuestionnaireRequiredPage />,
+            element: renderLazy(QuestionnaireRequiredPage),
           },
           {
             path: 'match-success',
-            element: <MatchSuccessPage />,
+            element: renderLazy(MatchSuccessPage),
           },
           {
             path: 'match-fail',
-            element: <MatchFailPage />,
+            element: renderLazy(MatchFailPage),
           },
           {
             path: 'match-report',
-            element: <MatchReportPage />,
+            element: renderLazy(MatchReportPage),
           },
           {
             path: 'chat',
-            element: <ChatRoomPage />,
+            element: renderLazy(ChatRoomPage),
           },
           {
             path: 'profile',
-            element: <ProfilePage />,
+            element: renderLazy(ProfilePage),
           },
           {
             path: 'security',
-            element: <SecurityPage />,
+            element: renderLazy(SecurityPage),
           },
           {
             path: 'bind-info',
-            element: <BindInfoPage />,
+            element: renderLazy(BindInfoPage),
           },
           {
             path: 'donate',
-            element: <DonatePage />,
+            element: renderLazy(DonatePage),
           },
         ],
       },
       {
         path: '/login',
-        element: <LoginPage />,
+        element: renderLazy(LoginPage),
       },
       {
         path: '/register',
-        element: <RegisterPage />,
+        element: renderLazy(RegisterPage),
       },
       {
         path: '/forgot-password',
-        element: <ForgotPasswordPage />,
+        element: renderLazy(ForgotPasswordPage),
       },
       {
         path: '/change-password',
-        element: <ChangePasswordPage />,
+        element: renderLazy(ChangePasswordPage),
       },
       {
         path: '/reset-password',
-        element: <ResetPasswordPage />,
+        element: renderLazy(ResetPasswordPage),
       },
       {
         // 捕获所有未匹配路由，重定向到首页

@@ -1,6 +1,7 @@
 import type { User } from '@/types';
 import { useAuthStore } from '@/store/auth';
 import { hasSupabaseConfig, supabase } from '@/lib/supabase';
+import { resetQuestionnaireSessionCache } from './questionnaireService';
 
 const AUTH_STORAGE_KEY = 'stitch_o_match_auth';
 const TOKEN_STORAGE_KEY = 'stitch_o_match_token';
@@ -175,6 +176,7 @@ const clearClientAuth = () => {
   localStorage.removeItem(TOKEN_STORAGE_KEY);
   localStorage.removeItem(USER_STORAGE_KEY);
   useAuthStore.getState().logout();
+  resetQuestionnaireSessionCache();
 };
 
 const readMockUsers = (): MockStoredUser[] => {

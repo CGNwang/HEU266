@@ -10,13 +10,13 @@ export type QuestionnaireSaveState = 'idle' | 'saving' | 'saved' | 'error';
 
 type ModuleKey = Exclude<keyof QuestionnaireAnswer, 'savedAt'>;
 
-interface UseQuestionnaireAutoSaveOptions<T extends Record<string, unknown>> {
+interface UseQuestionnaireAutoSaveOptions<T extends object> {
   moduleKey: ModuleKey;
   initialData: T;
   debounceMs?: number;
 }
 
-export const useQuestionnaireAutoSave = <T extends Record<string, unknown>>({
+export const useQuestionnaireAutoSave = <T extends object>({
   moduleKey,
   initialData,
   debounceMs = 800,
