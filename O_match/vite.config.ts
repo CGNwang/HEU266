@@ -24,6 +24,21 @@ export default defineConfig(({ mode }) => {
     build: {
       outDir: 'dist',
       sourcemap: true,
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            if (!id.includes('node_modules')) {
+              return undefined
+            }
+
+            if (id.includes('@supabase')) {
+              return 'supabase-vendor'
+            }
+
+            return undefined
+          },
+        },
+      },
     },
   }
 })

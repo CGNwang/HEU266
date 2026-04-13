@@ -14,8 +14,11 @@
 
 import { hasSupabaseConfig, supabase } from '@/lib/supabase';
 
-const STORAGE_KEY = 'stitch_o_match_questionnaire';
+const STORAGE_KEY_PREFIX = 'stitch_o_match_questionnaire';
+const LEGACY_STORAGE_KEY = 'stitch_o_match_questionnaire';
+const USER_STORAGE_KEY = 'stitch_o_match_user';
 let questionnaireCache: QuestionnaireAnswer | null = null;
+let questionnaireCacheKey: string | null = null;
 const REMOTE_SYNC_TTL_MS = 15 * 1000;
 
 let lastRemoteSyncAt = 0;
@@ -23,14 +26,30 @@ let remoteCacheUserId: string | null = null;
 let remoteLoadPromise: Promise<QuestionnaireAnswer | null> | null = null;
 
 const MODULE_ROW_CONFIG = {
-  module1: { moduleId: 'module_1', questionId: 'module_1_payload' },
-  module2: { moduleId: 'module_2', questionId: 'module_2_payload' },
-  module3: { moduleId: 'module_3', questionId: 'module_3_payload' },
-  module4: { moduleId: 'module_4', questionId: 'module_4_payload' },
-  module5: { moduleId: 'module_5', questionId: 'module_5_payload' },
+  module1: { moduleId: 'module_1' },
+  module2: { moduleId: 'module_2' },
+  module3: { moduleId: 'module_3' },
+  module4: { moduleId: 'module_4' },
+  module5: { moduleId: 'module_5' },
 } as const;
 
 type ModuleKey = keyof typeof MODULE_ROW_CONFIG;
+
+const MODULE_QUESTION_KEYS: Record<ModuleKey, readonly string[]> = {
+  module1: ['gender', 'expectedGender', 'stage', 'partnerStages', 'locations'],
+  module2: [
+    'q1Schedule', 'q1Attitude', 'q2Space', 'q2Tolerance', 'q3Frequency',
+    'q3Bottomline', 'q4Smoking', 'q4Bottomline', 'q5Alcohol', 'q5Bottomline',
+  ],
+  module3: [
+    'q1Slider', 'q1Preference', 'q2Slider', 'q2Preference', 'q3Slider', 'q3Preference',
+    'q4Slider', 'q4Preference', 'q5Slider', 'q5Preference', 'q6Slider', 'q6Preference',
+    'q7Slider', 'q7Preference', 'q8Slider', 'q8Preference', 'q9Slider', 'q9Preference',
+    'q10Slider', 'q10Preference',
+  ],
+  module4: ['q1', 'q2', 'q3', 'q4', 'q5', 'q6'],
+  module5: ['q1', 'q2', 'q3', 'q4', 'q5', 'q6', 'q7'],
+};
 
 interface QuestionnaireAnswerRow {
   module_id: string;
@@ -40,12 +59,48 @@ interface QuestionnaireAnswerRow {
   created_at?: string;
 }
 
+const resolveCurrentUserIdFromLocalStorage = (): string | null => {
+  const rawUser = localStorage.getItem(USER_STORAGE_KEY);
+  if (!rawUser) {
+    return null;
+  }
+
+  try {
+    const parsed = JSON.parse(rawUser) as { id?: unknown };
+    return typeof parsed.id === 'string' && parsed.id.trim() ? parsed.id : null;
+  } catch {
+    return null;
+  }
+};
+
+const getStorageKeyByUserId = (userId: string | null): string => {
+  return `${STORAGE_KEY_PREFIX}:${userId ?? 'guest'}`;
+};
+
+const getCurrentStorageKey = (): string => {
+  return getStorageKeyByUserId(resolveCurrentUserIdFromLocalStorage());
+};
+
 const readLocalQuestionnaire = (): QuestionnaireAnswer | null => {
-  if (questionnaireCache) {
+  const storageKey = getCurrentStorageKey();
+
+  if (questionnaireCache && questionnaireCacheKey === storageKey) {
     return questionnaireCache;
   }
 
-  const stored = localStorage.getItem(STORAGE_KEY);
+  questionnaireCache = null;
+  questionnaireCacheKey = storageKey;
+
+  let stored = localStorage.getItem(storageKey);
+  if (!stored) {
+    const legacy = localStorage.getItem(LEGACY_STORAGE_KEY);
+    if (legacy) {
+      stored = legacy;
+      localStorage.setItem(storageKey, legacy);
+      localStorage.removeItem(LEGACY_STORAGE_KEY);
+    }
+  }
+
   if (!stored) return null;
 
   try {
@@ -57,12 +112,21 @@ const readLocalQuestionnaire = (): QuestionnaireAnswer | null => {
 };
 
 const writeLocalQuestionnaire = (data: QuestionnaireAnswer): void => {
+  const storageKey = getCurrentStorageKey();
+  questionnaireCacheKey = storageKey;
   questionnaireCache = data;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  localStorage.setItem(storageKey, JSON.stringify(data));
 };
 
 export const getQuestionnaireSnapshot = (): QuestionnaireAnswer | null => {
   return readLocalQuestionnaire();
+};
+
+export const resetQuestionnaireSessionCache = (): void => {
+  questionnaireCache = null;
+  questionnaireCacheKey = null;
+  remoteCacheUserId = null;
+  resetRemoteSessionState();
 };
 
 const resetRemoteSessionState = () => {
@@ -79,7 +143,11 @@ const mergeQuestionnaireData = (data: QuestionnaireAnswer): QuestionnaireAnswer 
   };
 };
 
-const upsertModuleRows = async (userId: string, rows: Array<{
+const buildQuestionId = (moduleId: string, questionKey: string): string => {
+  return `${moduleId}.${questionKey}`;
+};
+
+const upsertModuleRows = async (rows: Array<{
   user_id: string;
   module_id: string;
   question_id: string;
@@ -119,11 +187,19 @@ const buildRowsFromAnswer = (userId: string, data: QuestionnaireAnswer) => {
     if (!moduleData) return;
 
     const config = MODULE_ROW_CONFIG[moduleKey];
-    rows.push({
-      user_id: userId,
-      module_id: config.moduleId,
-      question_id: config.questionId,
-      answer_value: moduleData,
+    const moduleRecord = moduleData as Record<string, unknown>;
+
+    MODULE_QUESTION_KEYS[moduleKey].forEach((questionKey) => {
+      if (!(questionKey in moduleRecord)) {
+        return;
+      }
+
+      rows.push({
+        user_id: userId,
+        module_id: config.moduleId,
+        question_id: buildQuestionId(config.moduleId, questionKey),
+        answer_value: moduleRecord[questionKey],
+      });
     });
   });
 
@@ -136,14 +212,36 @@ const mapRowsToQuestionnaire = (rows: QuestionnaireAnswerRow[]): QuestionnaireAn
   const result: QuestionnaireAnswer = {};
   let latestSavedAt = 0;
 
+  const resultRecord: Record<string, Record<string, unknown>> = {};
+
   rows.forEach((row) => {
     const moduleEntry = (Object.entries(MODULE_ROW_CONFIG) as Array<[ModuleKey, (typeof MODULE_ROW_CONFIG)[ModuleKey]]>)
-      .find(([, config]) => config.questionId === row.question_id || config.moduleId === row.module_id);
+      .find(([, config]) => config.moduleId === row.module_id);
 
     if (!moduleEntry) return;
 
-    const [moduleKey] = moduleEntry;
-    (result as Record<string, unknown>)[moduleKey] = row.answer_value;
+    const [moduleKey, config] = moduleEntry;
+    const payloadQuestionId = `${config.moduleId}_payload`;
+
+    if (row.question_id === payloadQuestionId && row.answer_value && typeof row.answer_value === 'object') {
+      resultRecord[moduleKey] = row.answer_value as Record<string, unknown>;
+    } else {
+      const prefix = `${config.moduleId}.`;
+      if (!row.question_id.startsWith(prefix)) {
+        return;
+      }
+
+      const questionKey = row.question_id.slice(prefix.length);
+      if (!questionKey) {
+        return;
+      }
+
+      const moduleResult = resultRecord[moduleKey] ?? {};
+      moduleResult[questionKey] = row.answer_value;
+      resultRecord[moduleKey] = moduleResult;
+    }
+
+    (result as Record<string, unknown>)[moduleKey] = resultRecord[moduleKey];
 
     const timestampSource = row.updated_at ?? row.created_at;
     if (timestampSource) {
@@ -168,15 +266,15 @@ const mapRowsToQuestionnaire = (rows: QuestionnaireAnswerRow[]): QuestionnaireAn
 const loadFromSupabase = async (userId: string): Promise<QuestionnaireAnswer | null> => {
   if (!supabase) return null;
 
-  const payloadQuestionIds = (Object.values(MODULE_ROW_CONFIG) as Array<(typeof MODULE_ROW_CONFIG)[ModuleKey]>).map(
-    (item) => item.questionId
+  const moduleIds = (Object.values(MODULE_ROW_CONFIG) as Array<(typeof MODULE_ROW_CONFIG)[ModuleKey]>).map(
+    (item) => item.moduleId
   );
 
   const { data, error } = await supabase
     .from('questionnaire_answers')
     .select('module_id, question_id, answer_value, updated_at, created_at')
     .eq('user_id', userId)
-    .in('question_id', payloadQuestionIds);
+    .in('module_id', moduleIds);
 
   if (error) {
     throw error;
@@ -249,11 +347,10 @@ const isModule5Complete = (module5: QuestionnaireAnswer['module5']): boolean =>
   );
 
 export const hasSubmittedQuestionnaire = (): boolean => {
-  const stored = localStorage.getItem(STORAGE_KEY);
-  if (!stored) return false;
-
   try {
-    const data = JSON.parse(stored) as QuestionnaireAnswer;
+    const data = readLocalQuestionnaire();
+    if (!data) return false;
+
     return (
       isModule1Complete(data.module1) &&
       isModule2Complete(data.module2) &&
@@ -358,7 +455,7 @@ export const saveQuestionnaire = async (data: QuestionnaireAnswer): Promise<void
     try {
       remoteCacheUserId = userId;
       const rows = buildRowsFromAnswer(userId, mergedData);
-      await upsertModuleRows(userId, rows);
+      await upsertModuleRows(rows);
       lastRemoteSyncAt = Date.now();
     } catch (error) {
       console.error('问卷远端保存失败，已回退到本地缓存:', error);
@@ -383,12 +480,18 @@ export const saveQuestionnaireModule = async <K extends ModuleKey>(
     try {
       remoteCacheUserId = userId;
       const config = MODULE_ROW_CONFIG[moduleKey];
-      await upsertModuleRows(userId, [{
-        user_id: userId,
-        module_id: config.moduleId,
-        question_id: config.questionId,
-        answer_value: moduleData,
-      }]);
+      const moduleRecord = moduleData as Record<string, unknown>;
+
+      const rows = MODULE_QUESTION_KEYS[moduleKey]
+        .filter((questionKey) => questionKey in moduleRecord)
+        .map((questionKey) => ({
+          user_id: userId,
+          module_id: config.moduleId,
+          question_id: buildQuestionId(config.moduleId, questionKey),
+          answer_value: moduleRecord[questionKey],
+        }));
+
+      await upsertModuleRows(rows);
       lastRemoteSyncAt = Date.now();
     } catch (error) {
       console.error('问卷模块远端保存失败，已回退到本地缓存:', error);
@@ -469,15 +572,15 @@ export const clearQuestionnaire = async (): Promise<void> => {
   const userId = await getAuthenticatedUserId();
   if (userId && supabase) {
     try {
-      const payloadQuestionIds = (Object.values(MODULE_ROW_CONFIG) as Array<(typeof MODULE_ROW_CONFIG)[ModuleKey]>).map(
-        (item) => item.questionId
+      const moduleIds = (Object.values(MODULE_ROW_CONFIG) as Array<(typeof MODULE_ROW_CONFIG)[ModuleKey]>).map(
+        (item) => item.moduleId
       );
 
       const { error } = await supabase
         .from('questionnaire_answers')
         .delete()
         .eq('user_id', userId)
-        .in('question_id', payloadQuestionIds);
+        .in('module_id', moduleIds);
 
       if (error) {
         throw error;
@@ -487,10 +590,10 @@ export const clearQuestionnaire = async (): Promise<void> => {
     }
   }
 
-  questionnaireCache = null;
-  remoteCacheUserId = null;
-  resetRemoteSessionState();
-  localStorage.removeItem(STORAGE_KEY);
+  const storageKey = getCurrentStorageKey();
+  localStorage.removeItem(storageKey);
+  localStorage.removeItem(LEGACY_STORAGE_KEY);
+  resetQuestionnaireSessionCache();
   console.log('问卷数据已清除');
 };
 

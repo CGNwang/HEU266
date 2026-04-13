@@ -1,5 +1,4 @@
 import { create } from 'zustand';
-import type { QuestionnaireAnswer } from '@/types';
 
 interface QuestionnaireState {
   currentModule: number;
