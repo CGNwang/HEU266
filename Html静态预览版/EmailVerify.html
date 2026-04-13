@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>🍊意配 - 校园身份认证</title>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts: Manrope & Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Design System Configuration -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "error": "#ba1a1a",
+              "surface": "#fdf9f3",
+              "inverse-primary": "#ffb783",
+              "surface-dim": "#dddad4",
+              "on-tertiary-fixed-variant": "#5a4300",
+              "outline": "#887365",
+              "on-secondary-fixed-variant": "#7c2e00",
+              "outline-variant": "#dbc2b2",
+              "secondary-container": "#fc7127",
+              "primary-fixed-dim": "#ffb783",
+              "on-secondary": "#ffffff",
+              "on-primary-container": "#602e00",
+              "error-container": "#ffdad6",
+              "secondary-fixed-dim": "#ffb595",
+              "on-primary": "#ffffff",
+              "on-surface": "#1c1c18",
+              "on-tertiary-fixed": "#251a00",
+              "tertiary": "#785a00",
+              "background": "#fdf9f3",
+              "on-secondary-container": "#5c2000",
+              "on-error-container": "#93000a",
+              "tertiary-fixed-dim": "#f8be00",
+              "primary-container": "#f68a2f",
+              "on-surface-variant": "#554337",
+              "on-primary-fixed-variant": "#713700",
+              "surface-container-lowest": "#ffffff",
+              "surface-container-low": "#f7f3ed",
+              "surface-container-high": "#ebe8e2",
+              "surface-container": "#f1ede7",
+              "primary": "#944a00",
+              "inverse-surface": "#31302d",
+              "surface-tint": "#944a00",
+              "surface-variant": "#e6e2dc",
+              "tertiary-container": "#d09e00",
+              "inverse-on-surface": "#f4f0ea",
+              "primary-fixed": "#ffdcc5",
+              "secondary": "#a23f00",
+              "secondary-fixed": "#ffdbcd",
+              "surface-container-highest": "#e6e2dc",
+              "tertiary-fixed": "#ffdf9a",
+              "on-error": "#ffffff",
+              "on-tertiary-container": "#4c3800",
+              "on-tertiary": "#ffffff",
+              "on-secondary-fixed": "#351000",
+              "on-primary-fixed": "#301400",
+              "surface-bright": "#fdf9f3",
+              "on-background": "#1c1c18"
+            },
+            fontFamily: {
+              "headline": ["Manrope", "sans-serif"],
+              "body": ["Manrope", "sans-serif"],
+              "label": ["Manrope", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+      body {
+        background-color: #fdf9f3;
+        font-family: 'Manrope', sans-serif;
+        overflow-x: hidden;
+      }
+      .warm-glow {
+        background: radial-gradient(circle at center, rgba(246, 138, 47, 0.15) 0%, rgba(253, 249, 243, 0) 70%);
+      }
+      .glass-card {
+        background: rgba(255, 255, 255, 0.6);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+      }
+      .ghost-border {
+        outline: 1px solid rgba(219, 194, 178, 0.2);
+      }
+      .sunset-gradient {
+        background: linear-gradient(135deg, #944a00 0%, #f68a2f 100%);
+      }
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+    </style>
+</head>
+<body class="bg-surface text-on-surface min-h-screen relative selection:bg-primary-fixed selection:text-on-primary-fixed overflow-y-auto">
+<!-- Background Decorative Elements -->
+<div class="fixed top-[-10%] right-[-5%] w-[500px] h-[500px] warm-glow rounded-full pointer-events-none"></div>
+<div class="fixed bottom-[-15%] left-[-10%] w-[600px] h-[600px] warm-glow rounded-full pointer-events-none opacity-60"></div>
+<!-- Main Content Wrapper with vertical padding and scrolling capability -->
+<div class="min-h-screen w-full flex flex-col items-center py-12 md:py-16 relative z-10 px-6">
+<!-- Main Navigation / Branding -->
+<div class="mb-12 md:mb-16">
+<div class="text-3xl font-black text-orange-700 tracking-tighter flex items-center gap-2 pointer-events-auto">
+<a href="index.html" class="flex items-center gap-1">
+<span>🍊</span>
+<span>意配</span>
+</a>
+</div>
+</div>
+<!-- Auth Canvas -->
+<main class="w-full max-w-lg flex-1 flex flex-col justify-center">
+<!-- Central Floating Card -->
+<div class="glass-card ghost-border rounded-[2rem] p-10 md:p-12 shadow-[0_8px_32px_rgba(28,28,24,0.06)] flex flex-col items-center text-center">
+<!-- Icon/Shield Visual -->
+<div class="w-20 h-20 sunset-gradient rounded-full flex items-center justify-center mb-8 shadow-lg shadow-orange-500/20">
+<span class="material-symbols-outlined text-white text-4xl" data-icon="verified_user">verified_user</span>
+</div>
+<!-- Title & Subtitle -->
+<h1 class="text-3xl font-bold font-headline text-on-surface tracking-tight mb-4">校园身份认证</h1>
+<p class="text-on-surface-variant leading-relaxed mb-10 max-w-xs">为了保持社交环境的纯粹，请使用 HEU 校园邮箱认证</p>
+<!-- Form -->
+<form class="w-full space-y-6">
+<div class="space-y-2 text-left">
+<label class="text-[11px] font-bold uppercase tracking-widest text-on-surface-variant ml-4" for="email">HEU 校园邮箱</label>
+<div class="relative group">
+<input class="w-full bg-surface-container-low border-none rounded-2xl py-4 px-6 text-on-surface placeholder:text-outline/40 focus:ring-0 focus:bg-surface-container-lowest transition-all duration-300 ghost-border" id="email" placeholder="name@hrbeu.edu.cn" type="email"/>
+<div class="absolute right-4 top-1/2 -translate-y-1/2">
+<span class="material-symbols-outlined text-outline/30" data-icon="alternate_email">alternate_email</span>
+</div>
+</div>
+</div>
+<!-- Verification Code Action -->
+<button onclick="window.location.href='Register.html'" class="w-full sunset-gradient text-white font-bold py-5 rounded-full shadow-lg shadow-orange-700/10 active:scale-[0.98] transition-all flex items-center justify-center gap-2 group" type="button">
+<span>发送验证码</span>
+<span class="material-symbols-outlined text-[20px] group-hover:translate-x-1 transition-transform" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</form>
+<!-- Privacy Policy & Trust Tags -->
+<div class="mt-10 pt-8 border-t border-orange-100/30 w-full">
+<div class="flex flex-wrap justify-center gap-4 mb-6">
+<div class="flex items-center gap-1.5 px-3 py-1.5 bg-secondary-fixed rounded-full text-on-secondary-fixed-variant text-xs font-semibold">
+<span class="material-symbols-outlined text-[14px]" data-icon="lock" style="font-variation-settings: 'FILL' 1;">lock</span>
+                            隐私加密保护
+                        </div>
+<div class="flex items-center gap-1.5 px-3 py-1.5 bg-surface-container-high rounded-full text-on-surface-variant text-xs font-semibold">
+<span class="material-symbols-outlined text-[14px]" data-icon="visibility_off" style="font-variation-settings: 'FILL' 1;">visibility_off</span>
+                            完全匿名策略
+                        </div>
+</div>
+<p class="text-[12px] text-on-surface-variant/60 leading-relaxed px-4">
+                        您的个人信息仅用于验证哈工程学生身份，系统将对您的真实姓名进行混淆脱敏。认证完成后，您将正式解锁「🍊意配」所有心动功能。
+                    </p>
+</div>
+</div>
+<!-- Secondary Action -->
+<div class="mt-12 text-center">
+<button class="text-on-surface-variant hover:text-primary font-medium text-sm transition-colors flex items-center justify-center gap-1 mx-auto">
+                    遇到问题？联系管理员
+                    <span class="material-symbols-outlined text-[16px]" data-icon="help_outline">help_outline</span>
+</button>
+</div>
+</main>
+</div>
+<!-- Bottom Aesthetic Glow -->
+<div class="fixed bottom-0 left-0 right-0 h-48 pointer-events-none -z-10">
+<div class="w-full h-full opacity-30 blur-[80px] bg-gradient-to-t from-orange-400 to-transparent"></div>
+</div>
+<!-- Visual Anchor Background Image (Bento style hint) -->
+<div class="fixed inset-0 -z-20 opacity-[0.03] grayscale pointer-events-none">
+<img alt="campus atmosphere" class="w-full h-full object-cover" data-alt="Blurred aesthetic view of a sunlit university campus hallway with students walking, soft warm light filtering through tall windows, editorial style" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDRLut5jslTVy0AUUns8rKAneqhUS4Uxgdy6pjVGKxPJIS2bXICE5-t0bByGjOQuZSMXG43GsISN0rDlutL2tRzhEfOsP5ypgcCSP1jD-ipm-yOJVvEvSxt8RaLQT74A1eo4Tg6yqEFpcad6jVqg62atEARz254q6K9mtYOjE5N_jbXps67nmyTZiDVp6bjnViaYl8s5uEqZHWtMNxMXg0y8HLn1zWbuwrcUvf3g6FCRMa-7Glv3Hm_TePfqto31ZnjN0lFekSzXTFr"/>
+</div>
+</body></html>

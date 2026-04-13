@@ -1,0 +1,318 @@
+import { http, HttpResponse, delay } from 'msw';
+
+// 模拟用户数据
+const mockUser = {
+  id: 'user_001',
+  email: 'student@hrbeu.edu.cn',
+  nickname: '小明',
+  avatar: '/avatar.jpg',
+  gender: 'male',
+  stage: 'undergrad_high',
+  createdAt: '2024-01-15T10:00:00Z',
+  verified: true,
+};
+
+const mockMatch = {
+  id: 'match_001',
+  matchId: 'match_2024_01',
+  partner: {
+    id: 'partner_001',
+    nickname: 'Orange',
+    avatar: '/avatar.jpg',
+    matchRate: 98,
+  },
+  status: 'matched',
+  createdAt: '2024-01-20T12:00:00Z',
+  expiresAt: '2024-01-27T12:00:00Z',
+  remainingTime: 72 * 3600,
+};
+
+const mockMessages = [
+  {
+    id: 'msg_001',
+    senderId: 'partner_001',
+    receiverId: 'user_001',
+    content: '嘿！我发现我们都常去图书馆二楼。你通常是坐在靠窗的那个位置吗？',
+    createdAt: '2024-01-21T10:24:00Z',
+    read: true,
+  },
+  {
+    id: 'msg_002',
+    senderId: 'user_001',
+    receiverId: 'partner_001',
+    content: '被发现了！😅 窗边的位置视野最好，学习累了看窗外特别解压。你现在在那儿吗？',
+    createdAt: '2024-01-21T10:28:00Z',
+    read: true,
+  },
+  {
+    id: 'msg_003',
+    senderId: 'partner_001',
+    receiverId: 'user_001',
+    content: '今天不在呢，不幸被困在一个 3 小时的研讨会里。简直是酷刑。',
+    createdAt: '2024-01-21T10:30:00Z',
+    read: true,
+  },
+];
+
+const mockQuestionnaireModules = [
+  {
+    id: 'module_1',
+    name: '基础画像',
+    description: '基本信息填写',
+    questions: [
+      {
+        id: 'q1',
+        type: 'single',
+        title: '你的性别是？',
+        required: true,
+        options: [
+          { value: 'male', label: '男生', icon: 'man' },
+          { value: 'female', label: '女生', icon: 'woman' },
+        ],
+      },
+      {
+        id: 'q2',
+        type: 'single',
+        title: '期待相遇的灵魂是？',
+        required: true,
+        options: [
+          { value: 'male', label: '男生', icon: 'man' },
+          { value: 'female', label: '女生', icon: 'woman' },
+          { value: 'both', label: '都可以，灵魂契合最重要', icon: 'auto_awesome' },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'module_2',
+    name: '生活颗粒度',
+    description: '日常生活习惯',
+    questions: [],
+  },
+  {
+    id: 'module_3',
+    name: '性格调色盘',
+    description: '性格特征分析',
+    questions: [],
+  },
+  {
+    id: 'module_4',
+    name: '三观与旷野',
+    description: '价值观与人生观',
+    questions: [],
+  },
+  {
+    id: 'module_5',
+    name: '亲密关系说明书',
+    description: '恋爱观与期望',
+    questions: [],
+  },
+];
+
+export const handlers = [
+  // ============ 认证相关 ============
+  // POST /api/auth/login
+  http.post('/api/auth/login', async ({ request }) => {
+    await delay(500);
+    const body = await request.json() as { email: string; password: string };
+
+    if (body.email && body.password) {
+      return HttpResponse.json({
+        code: 200,
+        message: '登录成功',
+        data: {
+          token: 'mock_token_' + Date.now(),
+          user: mockUser,
+        },
+      });
+    }
+
+    return HttpResponse.json({
+      code: 400,
+      message: '用户名或密码错误',
+      data: null,
+    }, { status: 400 });
+  }),
+
+  // POST /api/auth/register
+  http.post('/api/auth/register', async () => {
+    await delay(500);
+    return HttpResponse.json({
+      code: 200,
+      message: '注册成功',
+      data: {
+        token: 'mock_token_' + Date.now(),
+        user: mockUser,
+      },
+    });
+  }),
+
+  // POST /api/auth/send-code
+  http.post('/api/auth/send-code', async () => {
+    await delay(300);
+    return HttpResponse.json({
+      code: 200,
+      message: '验证码已发送',
+      data: null,
+    });
+  }),
+
+  // ============ 用户相关 ============
+  // GET /api/user/me
+  http.get('/api/user/me', async () => {
+    await delay(300);
+    return HttpResponse.json({
+      code: 200,
+      message: '获取成功',
+      data: mockUser,
+    });
+  }),
+
+  // GET /api/user/profile
+  http.get('/api/user/profile', async () => {
+    await delay(300);
+    return HttpResponse.json({
+      code: 200,
+      message: '获取成功',
+      data: {
+        userId: mockUser.id,
+        gender: 'male',
+        expectedGender: 'female',
+        stage: 'undergrad_high',
+        partnerStages: ['undergrad_high', 'master'],
+        locations: ['图书馆', '11号楼', '食堂'],
+        completedModules: 1,
+        questionnaireProgress: 20,
+      },
+    });
+  }),
+
+  // ============ 问卷相关 ============
+  // GET /api/questionnaire/modules
+  http.get('/api/questionnaire/modules', async () => {
+    await delay(300);
+    return HttpResponse.json({
+      code: 200,
+      message: '获取成功',
+      data: mockQuestionnaireModules,
+    });
+  }),
+
+  // GET /api/questionnaire/modules/:id
+  http.get('/api/questionnaire/modules/:id', async ({ params }) => {
+    await delay(300);
+    const module = mockQuestionnaireModules.find(m => m.id === params.id);
+    return HttpResponse.json({
+      code: 200,
+      message: '获取成功',
+      data: module || mockQuestionnaireModules[0],
+    });
+  }),
+
+  // GET /api/questionnaire/progress
+  http.get('/api/questionnaire/progress', async () => {
+    await delay(300);
+    return HttpResponse.json({
+      code: 200,
+      message: '获取成功',
+      data: {
+        completedModules: 1,
+        totalModules: 5,
+      },
+    });
+  }),
+
+  // ============ 匹配相关 ============
+  // GET /api/match/current
+  http.get('/api/match/current', async () => {
+    await delay(300);
+    return HttpResponse.json({
+      code: 200,
+      message: '获取成功',
+      data: {
+        match: mockMatch,
+        nextMatchTime: '2024-01-24T12:00:00Z',
+      },
+    });
+  }),
+
+  // POST /api/match/join
+  http.post('/api/match/join', async () => {
+    await delay(300);
+    return HttpResponse.json({
+      code: 200,
+      message: '参与成功',
+      data: null,
+    });
+  }),
+
+  // DELETE /api/match/join
+  http.delete('/api/match/join', async () => {
+    await delay(300);
+    return HttpResponse.json({
+      code: 200,
+      message: '取消成功',
+      data: null,
+    });
+  }),
+
+  // GET /api/match/next-time
+  http.get('/api/match/next-time', async () => {
+    await delay(300);
+    return HttpResponse.json({
+      code: 200,
+      message: '获取成功',
+      data: {
+        time: '2024-01-24T12:00:00Z',
+        weekday: '周三',
+        hour: 12,
+      },
+    });
+  }),
+
+  // ============ 聊天相关 ============
+  // GET /api/chat/messages/:matchId
+  http.get('/api/chat/messages/:matchId', async () => {
+    await delay(300);
+    return HttpResponse.json({
+      code: 200,
+      message: '获取成功',
+      data: {
+        list: mockMessages,
+        total: 3,
+        page: 1,
+        pageSize: 20,
+      },
+    });
+  }),
+
+  // POST /api/chat/send
+  http.post('/api/chat/send', async ({ request }) => {
+    await delay(200);
+    const body = await request.json() as { matchId: string; content: string };
+    return HttpResponse.json({
+      code: 200,
+      message: '发送成功',
+      data: {
+        id: 'msg_' + Date.now(),
+        senderId: mockUser.id,
+        receiverId: 'partner_001',
+        content: body.content,
+        createdAt: new Date().toISOString(),
+        read: false,
+      },
+    });
+  }),
+
+  // GET /api/chat/unread-count
+  http.get('/api/chat/unread-count', async () => {
+    await delay(200);
+    return HttpResponse.json({
+      code: 200,
+      message: '获取成功',
+      data: {
+        count: 2,
+      },
+    });
+  }),
+];
