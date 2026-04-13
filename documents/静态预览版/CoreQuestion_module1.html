@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Orange Match (意配) - 基础画像</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "error-container": "#ffdad6",
+              "on-primary-fixed": "#301400",
+              "surface-container-high": "#ebe8e2",
+              "on-tertiary": "#ffffff",
+              "inverse-on-surface": "#f4f0ea",
+              "on-surface": "#1c1c18",
+              "inverse-primary": "#ffb783",
+              "surface-dim": "#dddad4",
+              "surface-container-lowest": "#ffffff",
+              "primary-container": "#f68a2f",
+              "on-primary": "#ffffff",
+              "on-primary-container": "#602e00",
+              "on-secondary": "#ffffff",
+              "secondary-container": "#fc7127",
+              "on-tertiary-container": "#4c3800",
+              "on-background": "#1c1c18",
+              "inverse-surface": "#31302d",
+              "surface": "#fdf9f3",
+              "tertiary-fixed-dim": "#f8be00",
+              "surface-container": "#f1ede7",
+              "surface-bright": "#fdf9f3",
+              "on-tertiary-fixed-variant": "#5a4300",
+              "surface-tint": "#944a00",
+              "secondary-fixed-dim": "#ffb595",
+              "primary-fixed-dim": "#ffb783",
+              "primary-fixed": "#ffdcc5",
+              "on-surface-variant": "#554337",
+              "on-tertiary-fixed": "#251a00",
+              "outline-variant": "#dbc2b2",
+              "on-error-container": "#93000a",
+              "tertiary-container": "#d09e00",
+              "on-secondary-container": "#5c2000",
+              "on-error": "#ffffff",
+              "background": "#fdf9f3",
+              "on-primary-fixed-variant": "#713700",
+              "tertiary-fixed": "#ffdf9a",
+              "surface-variant": "#e6e2dc",
+              "secondary-fixed": "#ffdbcd",
+              "primary": "#944a00",
+              "on-secondary-fixed": "#351000",
+              "error": "#ba1a1a",
+              "surface-container-highest": "#e6e2dc",
+              "on-secondary-fixed-variant": "#7c2e00",
+              "tertiary": "#785a00",
+              "outline": "#887365",
+              "secondary": "#a23f00",
+              "surface-container-low": "#f7f3ed"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Manrope"],
+              "label": ["Manrope"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "1rem", "2xl": "1.5rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Manrope', sans-serif; -webkit-font-smoothing: antialiased; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(24px) saturate(160%);
+            -webkit-backdrop-filter: blur(24px) saturate(160%);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface selection:bg-secondary-fixed">
+<!-- Top Navigation Bar -->
+<nav class="sticky top-4 mx-auto w-[92%] max-w-7xl rounded-2xl bg-white/70 dark:bg-stone-900/60 backdrop-blur-3xl outline outline-1 outline-orange-200/20 dark:outline-stone-700/20 shadow-[0_4px_24px_rgba(28,28,24,0.04)] flex justify-between items-center px-5 md:px-8 py-3.5 z-50">
+<div class="text-xl md:text-2xl font-black text-orange-700 dark:text-orange-500 tracking-tighter"><a href="index.html" class="flex items-center gap-1">🍊意配</a></div>
+<div class="hidden md:flex gap-8 items-center font-manrope font-medium text-sm tracking-tight text-stone-600 dark:text-stone-400">
+<a class="hover:text-orange-600 transition-colors" href="index.html">首页</a>
+<a class="text-orange-700 dark:text-orange-400 font-bold border-b-2 border-orange-500 pb-1" href="CoreQuestion_module1.html">问卷</a>
+<a class="hover:text-orange-600 transition-colors" href="Waiting.html">我的匹配</a>
+</div>
+<div class="flex items-center gap-2 md:gap-4 text-orange-600 dark:text-orange-400">
+<a href="ChatRoom.html" class="p-2 hover:bg-orange-50/50 dark:hover:bg-stone-800/50 rounded-lg transition-all active:scale-95">
+<span class="material-symbols-outlined text-2xl">notifications</span>
+</a>
+<a href="Profile.html" class="p-2 hover:bg-orange-50/50 dark:hover:bg-stone-800/50 rounded-lg transition-all active:scale-95">
+<span class="material-symbols-outlined text-2xl">account_circle</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="pt-24 pb-44 px-4 max-w-3xl mx-auto min-h-screen">
+<!-- Progress Bar Section -->
+<div class="flex items-center justify-between mb-8 gap-6">
+<div class="w-full">
+<div class="flex justify-between items-end mb-2">
+<span class="text-on-surface-variant text-sm font-semibold">问卷完成度</span>
+<span class="text-primary font-bold">0/33</span>
+</div>
+<div class="h-2 w-full bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-primary-container w-[2%] rounded-full shadow-[0_0_8px_rgba(246,138,47,0.4)]"></div>
+</div>
+</div>
+</div>
+<!-- Section Navigation -->
+<div class="flex gap-2 overflow-x-auto pb-4 mb-10 no-scrollbar items-center">
+<button onclick="window.location.href='CoreQuestion_module1.html'" class="whitespace-nowrap flex items-center gap-2 bg-[#ffdbcd] text-[#a23f00] px-4 py-2.5 rounded-xl font-bold shadow-sm">
+<span class="material-symbols-outlined text-lg">person</span>
+                基础画像
+            </button>
+<button onclick="window.location.href='CoreQuestion_module2.html'" class="whitespace-nowrap flex items-center gap-2 text-on-surface-variant px-4 py-2.5 rounded-xl font-medium hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined text-lg">bedtime</span>
+                生活颗粒度
+            </button>
+<button onclick="window.location.href='CoreQuestion_module3.html'" class="whitespace-nowrap flex items-center gap-2 text-on-surface-variant px-4 py-2.5 rounded-xl font-medium hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined text-lg">psychology</span>
+                性格调色盘
+            </button>
+<button onclick="window.location.href='CoreQuestion_module4.html'" class="whitespace-nowrap flex items-center gap-2 text-on-surface-variant px-4 py-2.5 rounded-xl font-medium hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined text-lg">favorite</span>
+                三观与旷野
+            </button>
+<button onclick="window.location.href='CoreQuestion_module5.html'" class="whitespace-nowrap flex items-center gap-2 text-on-surface-variant px-4 py-2.5 rounded-xl font-medium hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined text-lg">diversity_1</span>
+                亲密关系说明书
+            </button>
+</div>
+<!-- Survey Content Area -->
+<section class="space-y-12">
+<!-- Header -->
+<div class="space-y-3">
+<h1 class="text-4xl font-black tracking-tight text-on-surface">基础画像</h1>
+<p class="text-on-surface-variant leading-relaxed text-lg max-w-xl">
+                    欢迎开启你的灵魂盲盒。这几个基础问题将作为我们为你匹配的『物理坐标』，仅需 <span class="text-secondary font-bold">30 秒</span> 即可完成。
+                </p>
+</div>
+<!-- Q1: 性别 -->
+<div class="space-y-4">
+<label class="text-xl font-bold text-on-surface flex items-center gap-2">
+<span class="w-1.5 h-6 bg-primary-container rounded-full"></span>
+                    你的性别是？
+                </label>
+<div class="grid grid-cols-2 gap-4">
+<label class="relative group cursor-pointer">
+<input class="peer sr-only" name="gender" type="radio"/>
+<div class="p-6 rounded-2xl bg-surface-container-low border-2 border-transparent peer-checked:border-primary peer-checked:bg-white transition-all duration-300 flex flex-col items-center gap-3 shadow-[0_8px_32px_0_rgba(28,28,24,0.06)]">
+<span class="material-symbols-outlined text-3xl text-stone-400 group-hover:text-primary transition-colors">man</span>
+<span class="font-bold text-sm">男生</span>
+</div>
+</label>
+<label class="relative group cursor-pointer">
+<input class="peer sr-only" name="gender" type="radio"/>
+<div class="p-6 rounded-2xl bg-surface-container-low border-2 border-transparent peer-checked:border-primary peer-checked:bg-white transition-all duration-300 flex flex-col items-center gap-3 shadow-[0_8px_32px_0_rgba(28,28,24,0.06)]">
+<span class="material-symbols-outlined text-3xl text-stone-400 group-hover:text-primary transition-colors">woman</span>
+<span class="font-bold text-sm">女生</span>
+</div>
+</label>
+</div>
+</div>
+<!-- Q2: 期待 -->
+<div class="space-y-4">
+<label class="text-xl font-bold text-on-surface flex items-center gap-2">
+<span class="w-1.5 h-6 bg-primary-container rounded-full"></span>
+                    期待相遇的灵魂是？
+                </label>
+<div class="grid grid-cols-2 md:grid-cols-3 gap-4"><label class="relative group cursor-pointer">
+<input class="peer sr-only" name="expected_gender" type="radio"/>
+<div class="p-6 rounded-2xl bg-surface-container-low border-2 border-transparent peer-checked:border-primary peer-checked:bg-white transition-all duration-300 flex flex-col items-center gap-3 shadow-[0_8px_32px_0_rgba(28,28,24,0.06)]">
+<span class="material-symbols-outlined text-3xl text-stone-400 group-hover:text-primary transition-colors">man</span>
+<span class="font-bold text-sm text-on-surface">男生</span>
+</div>
+</label>
+<label class="relative group cursor-pointer">
+<input class="peer sr-only" name="expected_gender" type="radio"/>
+<div class="p-6 rounded-2xl bg-surface-container-low border-2 border-transparent peer-checked:border-primary peer-checked:bg-white transition-all duration-300 flex flex-col items-center gap-3 shadow-[0_8px_32px_0_rgba(28,28,24,0.06)]">
+<span class="material-symbols-outlined text-3xl text-stone-400 group-hover:text-primary transition-colors">woman</span>
+<span class="font-bold text-sm text-on-surface">女生</span>
+</div>
+</label>
+<label class="relative group cursor-pointer md:col-span-1">
+<input checked="" class="peer sr-only" name="expected_gender" type="radio"/>
+<div class="p-6 rounded-2xl bg-surface-container-low border-2 border-transparent peer-checked:border-primary peer-checked:bg-white transition-all duration-300 flex flex-col items-center gap-3 shadow-[0_8px_32px_0_rgba(28,28,24,0.06)]">
+<span class="material-symbols-outlined text-3xl text-stone-400 group-hover:text-primary transition-colors">auto_awesome</span>
+<span class="font-bold text-sm text-on-surface text-center">都可以，灵魂契合最重要</span>
+</div>
+</label></div>
+</div>
+<!-- Q3: 修炼阶段 -->
+<div class="space-y-4">
+<label class="text-xl font-bold text-on-surface flex items-center gap-2">
+<span class="w-1.5 h-6 bg-primary-container rounded-full"></span>
+                    你目前的“修炼”阶段是？
+                </label>
+<div class=""><div class="grid grid-cols-2 gap-4">
+<label class="relative group cursor-pointer">
+<input class="peer sr-only" name="stage" type="radio"/>
+<div class="p-6 rounded-2xl bg-surface-container-low border-2 border-transparent peer-checked:border-primary peer-checked:bg-white transition-all duration-300 flex flex-col items-center gap-3 shadow-[0_8px_32px_0_rgba(28,28,24,0.06)]">
+<span class="material-symbols-outlined text-3xl text-stone-400 group-hover:text-primary transition-colors">school</span>
+<span class="font-bold text-sm text-on-surface text-center">本科低年级<br/><span class="text-[10px] font-medium opacity-60">（大一、大二）</span></span>
+</div>
+</label>
+<label class="relative group cursor-pointer">
+<input class="peer sr-only" name="stage" type="radio"/>
+<div class="p-6 rounded-2xl bg-surface-container-low border-2 border-transparent peer-checked:border-primary peer-checked:bg-white transition-all duration-300 flex flex-col items-center gap-3 shadow-[0_8px_32px_0_rgba(28,28,24,0.06)]">
+<span class="material-symbols-outlined text-3xl text-stone-400 group-hover:text-primary transition-colors">history_edu</span>
+<span class="font-bold text-sm text-on-surface text-center">本科高年级<br/><span class="text-[10px] font-medium opacity-60">（大三、大四）</span></span>
+</div>
+</label>
+<label class="relative group cursor-pointer">
+<input class="peer sr-only" name="stage" type="radio"/>
+<div class="p-6 rounded-2xl bg-surface-container-low border-2 border-transparent peer-checked:border-primary peer-checked:bg-white transition-all duration-300 flex flex-col items-center gap-3 shadow-[0_8px_32px_0_rgba(28,28,24,0.06)]">
+<span class="material-symbols-outlined text-3xl text-stone-400 group-hover:text-primary transition-colors">workspace_premium</span>
+<span class="font-bold text-sm text-on-surface">硕士研究生</span>
+</div>
+</label>
+<label class="relative group cursor-pointer">
+<input class="peer sr-only" name="stage" type="radio"/>
+<div class="p-6 rounded-2xl bg-surface-container-low border-2 border-transparent peer-checked:border-primary peer-checked:bg-white transition-all duration-300 flex flex-col items-center gap-3 shadow-[0_8px_32px_0_rgba(28,28,24,0.06)]">
+<span class="material-symbols-outlined text-3xl text-stone-400 group-hover:text-primary transition-colors">military_tech</span>
+<span class="font-bold text-sm text-on-surface">博士研究生</span>
+</div>
+</label>
+</div></div>
+</div>
+<!-- Q4: 对方阶段 (Restyled) -->
+<div class="space-y-4">
+<label class="text-xl font-bold text-on-surface flex items-center gap-2">
+<span class="w-1.5 h-6 bg-primary-container rounded-full"></span>
+                    期待对方处于什么阶段？ （可多选）</label>
+<div class="grid grid-cols-2 md:grid-cols-2 gap-4">
+<label class="relative group cursor-pointer">
+<input class="peer sr-only" name="partner_stage" type="checkbox"/>
+<div class="p-6 rounded-2xl bg-surface-container-low border-2 border-transparent peer-checked:border-primary peer-checked:bg-white transition-all duration-300 flex flex-col items-center gap-3 shadow-[0_8px_32px_0_rgba(28,28,24,0.06)]">
+<span class="material-symbols-outlined text-3xl text-stone-400 group-hover:text-primary transition-colors">school</span>
+<span class="font-bold text-sm text-on-surface">本科低年级<br/><span class="text-[10px] font-medium opacity-60">（大一、大二）</span></span>
+</div>
+</label>
+<label class="relative group cursor-pointer">
+<input class="peer sr-only" name="partner_stage" type="checkbox"/>
+<div class="p-6 rounded-2xl bg-surface-container-low border-2 border-transparent peer-checked:border-primary peer-checked:bg-white transition-all duration-300 flex flex-col items-center gap-3 shadow-[0_8px_32px_0_rgba(28,28,24,0.06)]">
+<span class="material-symbols-outlined text-3xl text-stone-400 group-hover:text-primary transition-colors">history_edu</span>
+<span class="font-bold text-sm text-on-surface">本科高年级<br/><span class="text-[10px] font-medium opacity-60">（大三、大四）</span></span>
+</div>
+</label>
+<label class="relative group cursor-pointer">
+<input class="peer sr-only" name="partner_stage" type="checkbox"/>
+<div class="p-6 rounded-2xl bg-surface-container-low border-2 border-transparent peer-checked:border-primary peer-checked:bg-white transition-all duration-300 flex flex-col items-center gap-3 shadow-[0_8px_32px_0_rgba(28,28,24,0.06)]">
+<span class="material-symbols-outlined text-3xl text-stone-400 group-hover:text-primary transition-colors">workspace_premium</span>
+<span class="font-bold text-sm text-on-surface">硕士研究生</span>
+</div>
+</label>
+<label class="relative group cursor-pointer">
+<input class="peer sr-only" name="partner_stage" type="checkbox"/>
+<div class="p-6 rounded-2xl bg-surface-container-low border-2 border-transparent peer-checked:border-primary peer-checked:bg-white transition-all duration-300 flex flex-col items-center gap-3 shadow-[0_8px_32px_0_rgba(28,28,24,0.06)]">
+<span class="material-symbols-outlined text-3xl text-stone-400 group-hover:text-primary transition-colors">military_tech</span>
+<span class="font-bold text-sm text-on-surface">博士研究生</span>
+</div>
+</label>
+<label class="relative group cursor-pointer col-span-2">
+<input class="peer sr-only" name="partner_stage" type="checkbox"/>
+<div class="p-6 rounded-2xl bg-surface-container-low border-2 border-dashed border-secondary/20 peer-checked:border-secondary peer-checked:border-solid peer-checked:bg-white transition-all duration-300 flex flex-col items-center gap-3 shadow-[0_8px_32px_0_rgba(28,28,24,0.06)]">
+<span class="material-symbols-outlined text-3xl text-stone-400 group-hover:text-secondary transition-colors">all_inclusive</span>
+<span class="font-bold text-sm text-secondary">都可以（互斥）</span>
+</div>
+</label>
+</div>
+</div>
+<!-- Q5: 刷新地 -->
+<div class="space-y-4">
+<label class="text-xl font-bold text-on-surface flex items-center gap-2">
+<span class="w-1.5 h-6 bg-primary-container rounded-full"></span>
+                    你在 HEU 的主要刷新地是？
+                </label>
+<div class="flex flex-wrap gap-2">
+<label class="relative cursor-pointer group">
+<input class="peer sr-only" name="locations" type="checkbox" value="启航活动中心"/>
+<div class="px-5 py-2.5 rounded-full bg-surface-container-high text-on-surface-variant font-bold text-sm transition-all active:scale-95 peer-checked:bg-gradient-to-br peer-checked:from-[#F28C38] peer-checked:to-[#F68A2F] peer-checked:text-white peer-checked:shadow-xl peer-checked:shadow-orange-900/20 hover:bg-orange-50 hover:text-primary">启航活动中心</div>
+</label>
+<label class="relative cursor-pointer group">
+<input checked="" class="peer sr-only" name="locations" type="checkbox" value="图书馆"/>
+<div class="px-5 py-2.5 rounded-full bg-surface-container-high text-on-surface-variant font-bold text-sm transition-all active:scale-95 peer-checked:bg-gradient-to-br peer-checked:from-[#F28C38] peer-checked:to-[#F68A2F] peer-checked:text-white peer-checked:shadow-xl peer-checked:shadow-orange-900/20 hover:bg-orange-50 hover:text-primary">图书馆</div>
+</label>
+<label class="relative cursor-pointer group">
+<input class="peer sr-only" name="locations" type="checkbox" value="船海楼"/>
+<div class="px-5 py-2.5 rounded-full bg-surface-container-high text-on-surface-variant font-bold text-sm transition-all active:scale-95 peer-checked:bg-gradient-to-br peer-checked:from-[#F28C38] peer-checked:to-[#F68A2F] peer-checked:text-white peer-checked:shadow-xl peer-checked:shadow-orange-900/20 hover:bg-orange-50 hover:text-primary">船海楼</div>
+</label>
+<label class="relative cursor-pointer group">
+<input class="peer sr-only" name="locations" type="checkbox" value="11号楼"/>
+<div class="px-5 py-2.5 rounded-full bg-surface-container-high text-on-surface-variant font-bold text-sm transition-all active:scale-95 peer-checked:bg-gradient-to-br peer-checked:from-[#F28C38] peer-checked:to-[#F68A2F] peer-checked:text-white peer-checked:shadow-xl peer-checked:shadow-orange-900/20 hover:bg-orange-50 hover:text-primary">11号楼</div>
+</label>
+<label class="relative cursor-pointer group">
+<input class="peer sr-only" name="locations" type="checkbox" value="21号楼"/>
+<div class="px-5 py-2.5 rounded-full bg-surface-container-high text-on-surface-variant font-bold text-sm transition-all active:scale-95 peer-checked:bg-gradient-to-br peer-checked:from-[#F28C38] peer-checked:to-[#F68A2F] peer-checked:text-white peer-checked:shadow-xl peer-checked:shadow-orange-900/20 hover:bg-orange-50 hover:text-primary">21号楼</div>
+</label>
+<label class="relative cursor-pointer group">
+<input class="peer sr-only" name="locations" type="checkbox" value="31号楼"/>
+<div class="px-5 py-2.5 rounded-full bg-surface-container-high text-on-surface-variant font-bold text-sm transition-all active:scale-95 peer-checked:bg-gradient-to-br peer-checked:from-[#F28C38] peer-checked:to-[#F68A2F] peer-checked:text-white peer-checked:shadow-xl peer-checked:shadow-orange-900/20 hover:bg-orange-50 hover:text-primary">31号楼</div>
+</label>
+<label class="relative cursor-pointer group">
+<input class="peer sr-only" name="locations" type="checkbox" value="41号楼"/>
+<div class="px-5 py-2.5 rounded-full bg-surface-container-high text-on-surface-variant font-bold text-sm transition-all active:scale-95 peer-checked:bg-gradient-to-br peer-checked:from-[#F28C38] peer-checked:to-[#F68A2F] peer-checked:text-white peer-checked:shadow-xl peer-checked:shadow-orange-900/20 hover:bg-orange-50 hover:text-primary">41号楼</div>
+</label>
+<label class="relative cursor-pointer group">
+<input class="peer sr-only" name="locations" type="checkbox" value="61号楼"/>
+<div class="px-5 py-2.5 rounded-full bg-surface-container-high text-on-surface-variant font-bold text-sm transition-all active:scale-95 peer-checked:bg-gradient-to-br peer-checked:from-[#F28C38] peer-checked:to-[#F68A2F] peer-checked:text-white peer-checked:shadow-xl peer-checked:shadow-orange-900/20 hover:bg-orange-50 hover:text-primary">61号楼</div>
+</label>
+<label class="relative cursor-pointer group">
+<input class="peer sr-only" name="locations" type="checkbox" value="南体"/>
+<div class="px-5 py-2.5 rounded-full bg-surface-container-high text-on-surface-variant font-bold text-sm transition-all active:scale-95 peer-checked:bg-gradient-to-br peer-checked:from-[#F28C38] peer-checked:to-[#F68A2F] peer-checked:text-white peer-checked:shadow-xl peer-checked:shadow-orange-900/20 hover:bg-orange-50 hover:text-primary">南体</div>
+</label>
+<label class="relative cursor-pointer group">
+<input class="peer sr-only" name="locations" type="checkbox" value="北体"/>
+<div class="px-5 py-2.5 rounded-full bg-surface-container-high text-on-surface-variant font-bold text-sm transition-all active:scale-95 peer-checked:bg-gradient-to-br peer-checked:from-[#F28C38] peer-checked:to-[#F68A2F] peer-checked:text-white peer-checked:shadow-xl peer-checked:shadow-orange-900/20 hover:bg-orange-50 hover:text-primary">北体</div>
+</label>
+<label class="relative cursor-pointer group">
+<input class="peer sr-only" name="locations" type="checkbox" value="军工操场"/>
+<div class="px-5 py-2.5 rounded-full bg-surface-container-high text-on-surface-variant font-bold text-sm transition-all active:scale-95 peer-checked:bg-gradient-to-br peer-checked:from-[#F28C38] peer-checked:to-[#F68A2F] peer-checked:text-white peer-checked:shadow-xl peer-checked:shadow-orange-900/20 hover:bg-orange-50 hover:text-primary">军工操场</div>
+</label>
+<label class="relative cursor-pointer group">
+<input class="peer sr-only" name="locations" type="checkbox" value="体育馆"/>
+<div class="px-5 py-2.5 rounded-full bg-surface-container-high text-on-surface-variant font-bold text-sm transition-all active:scale-95 peer-checked:bg-gradient-to-br peer-checked:from-[#F28C38] peer-checked:to-[#F68A2F] peer-checked:text-white peer-checked:shadow-xl peer-checked:shadow-orange-900/20 hover:bg-orange-50 hover:text-primary">体育馆</div>
+</label>
+<label class="relative cursor-pointer group">
+<input checked="" class="peer sr-only" name="locations" type="checkbox" value="宿舍"/>
+<div class="px-5 py-2.5 rounded-full bg-surface-container-high text-on-surface-variant font-bold text-sm transition-all active:scale-95 peer-checked:bg-gradient-to-br peer-checked:from-[#F28C38] peer-checked:to-[#F68A2F] peer-checked:text-white peer-checked:shadow-xl peer-checked:shadow-orange-900/20 hover:bg-orange-50 hover:text-primary">宿舍</div>
+</label>
+<label class="relative cursor-pointer group">
+<input class="peer sr-only" name="locations" type="checkbox" value="各大食堂"/>
+<div class="px-5 py-2.5 rounded-full bg-surface-container-high text-on-surface-variant font-bold text-sm transition-all active:scale-95 peer-checked:bg-gradient-to-br peer-checked:from-[#F28C38] peer-checked:to-[#F68A2F] peer-checked:text-white peer-checked:shadow-xl peer-checked:shadow-orange-900/20 hover:bg-orange-50 hover:text-primary">各大食堂</div>
+</label>
+</div>
+</div>
+<!-- Action Area -->
+<div class="pt-12 flex justify-center flex-col items-center gap-4">
+<button onclick="window.location.href='CoreQuestion_module2.html'" class="w-full py-5 rounded-full bg-gradient-to-br from-[#F28C38] to-[#f68a2f] text-white font-black tracking-widest text-lg shadow-xl shadow-[#F28C38]/30 active:scale-95 transition-all">
+                继续探索下一个维度
+            </button>
+<button class="w-full py-5 rounded-full bg-surface-container-high text-on-surface font-black tracking-widest text-lg active:scale-95 transition-all">
+                暂存进度
+            </button>
+</div>
+</section>
+</main>
+<!-- Mobile Navigation (Bottom Nav) - Synchronized with Home Page Style -->
+<div class="md:hidden fixed bottom-4 left-1/2 -translate-x-1/2 w-[92%] z-[110]">
+<nav class="glass-panel py-3 px-6 rounded-3xl shadow-2xl flex justify-between items-center backdrop-blur-3xl border-orange-100/30">
+<a class="flex flex-col items-center gap-1 text-on-surface-variant/60 hover:text-orange-600 transition-colors" href="index.html">
+<span class="material-symbols-outlined text-[24px]">home</span>
+<span class="text-[10px] font-bold">首页</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-orange-700" href="CoreQuestion_module1.html">
+<span class="material-symbols-outlined text-[24px]" style="font-variation-settings: 'FILL' 1;">quiz</span>
+<span class="text-[10px] font-bold">问卷</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-on-surface-variant/60 hover:text-orange-600 transition-colors" href="Waiting.html">
+<span class="material-symbols-outlined text-[24px]">person_search</span>
+<span class="text-[10px] font-bold">我的匹配</span>
+</a>
+</nav>
+</div>
+</body></html>

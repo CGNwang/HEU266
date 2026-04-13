@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Orange Match (意配) - 亲密关系说明书</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "error-container": "#ffdad6",
+                        "on-primary-fixed": "#301400",
+                        "surface-container-high": "#ebe8e2",
+                        "on-tertiary": "#ffffff",
+                        "inverse-on-surface": "#f4f0ea",
+                        "on-surface": "#1c1c18",
+                        "inverse-primary": "#ffb783",
+                        "surface-dim": "#dddad4",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-container": "#f68a2f",
+                        "on-primary": "#ffffff",
+                        "on-primary-container": "#602e00",
+                        "on-secondary": "#ffffff",
+                        "secondary-container": "#fc7127",
+                        "on-tertiary-container": "#4c3800",
+                        "on-background": "#1c1c18",
+                        "inverse-surface": "#31302d",
+                        "surface": "#fdf9f3",
+                        "tertiary-fixed-dim": "#f8be00",
+                        "surface-container": "#f1ede7",
+                        "surface-bright": "#fdf9f3",
+                        "on-tertiary-fixed-variant": "#5a4300",
+                        "surface-tint": "#944a00",
+                        "secondary-fixed-dim": "#ffb595",
+                        "primary-fixed-dim": "#ffb783",
+                        "primary-fixed": "#ffdcc5",
+                        "on-surface-variant": "#554337",
+                        "on-tertiary-fixed": "#251a00",
+                        "outline-variant": "#dbc2b2",
+                        "on-error-container": "#93000a",
+                        "tertiary-container": "#d09e00",
+                        "on-secondary-container": "#5c2000",
+                        "on-error": "#ffffff",
+                        "background": "#fdf9f3",
+                        "on-primary-fixed-variant": "#713700",
+                        "tertiary-fixed": "#ffdf9a",
+                        "surface-variant": "#e6e2dc",
+                        "secondary-fixed": "#ffdbcd",
+                        "primary": "#944a00",
+                        "on-secondary-fixed": "#351000",
+                        "error": "#ba1a1a",
+                        "surface-container-highest": "#e6e2dc",
+                        "on-secondary-fixed-variant": "#7c2e00",
+                        "tertiary": "#785a00",
+                        "outline": "#887365",
+                        "secondary": "#a23f00",
+                        "surface-container-low": "#f7f3ed"
+                    },
+                    fontFamily: {
+                        "headline": ["Manrope"],
+                        "body": ["Manrope"],
+                        "label": ["Manrope"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Manrope', sans-serif; -webkit-font-smoothing: antialiased; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .glass-nav { backdrop-filter: blur(24px); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* Multi-select interaction styles */
+        .multi-select-active {
+            background: linear-gradient(to bottom right, #F28C38, #f68a2f) !important;
+            color: white !important;
+            box-shadow: 0 10px 25px -5px rgba(242, 140, 56, 0.4) !important;
+            border-color: transparent !important;
+        }
+        .multi-select-active .text-sm { color: rgba(255, 255, 255, 0.9) !important; }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(24px) saturate(160%);
+            -webkit-backdrop-filter: blur(24px) saturate(160%);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface selection:bg-secondary-fixed">
+<!-- Top Navigation Bar -->
+<nav class="sticky top-4 mx-auto w-[95%] max-w-7xl rounded-2xl bg-white/60 dark:bg-stone-900/60 backdrop-blur-3xl outline outline-1 outline-orange-200/15 dark:outline-stone-700/20 shadow-[0_8px_32px_rgba(28,28,24,0.06)] flex justify-between items-center px-8 py-4 z-50">
+<div class="text-2xl font-black text-orange-700 dark:text-orange-500 tracking-tighter"><a href="index.html" class="flex items-center gap-1">🍊意配</a></div>
+<div class="hidden md:flex gap-8 items-center font-manrope font-medium text-sm tracking-tight text-stone-600 dark:text-stone-400">
+<a class="hover:text-orange-600 transition-colors" href="index.html">首页</a>
+<a class="text-orange-700 dark:text-orange-400 font-bold border-b-2 border-orange-500 pb-1" href="CoreQuestion_module1.html">问卷</a>
+<a class="hover:text-orange-600 transition-colors" href="Waiting.html">我的匹配</a>
+</div>
+<div class="flex items-center gap-4 text-orange-600 dark:text-orange-400">
+<a href="ChatRoom.html" class="p-2 hover:bg-orange-50/50 dark:hover:bg-stone-800/50 rounded-lg transition-all active:scale-95 duration-200 ease-out">
+<span class="material-symbols-outlined">notifications</span>
+</a>
+<a href="Profile.html" class="p-2 hover:bg-orange-50/50 dark:hover:bg-stone-800/50 rounded-lg transition-all active:scale-95 duration-200 ease-out">
+<span class="material-symbols-outlined">account_circle</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="pt-24 pb-32 px-4 max-w-3xl mx-auto min-h-[1024px]">
+<!-- Progress Bar Section -->
+<div class="flex items-center justify-between mb-8 gap-6">
+<div class="w-full">
+<div class="flex justify-between items-end mb-2">
+<span class="text-on-surface-variant text-sm font-semibold">问卷完成度</span>
+<span class="text-primary font-bold">26/33</span>
+</div>
+<div class="h-2 w-full bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-primary-container rounded-full shadow-[0_0_8px_rgba(246,138,47,0.4)] transition-all duration-700" style="width: 78.7%;"></div>
+</div>
+</div>
+</div>
+<!-- Section Navigation -->
+<div class="flex gap-2 overflow-x-auto pb-4 mb-10 no-scrollbar items-center">
+<button onclick="window.location.href='CoreQuestion_module1.html'" class="whitespace-nowrap flex items-center gap-2 text-on-surface-variant px-4 py-2.5 rounded-xl font-medium hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined text-lg">person</span>
+                基础画像
+            </button>
+<button onclick="window.location.href='CoreQuestion_module2.html'" class="whitespace-nowrap flex items-center gap-2 text-on-surface-variant px-4 py-2.5 rounded-xl font-medium hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined text-lg">bedtime</span>
+                生活颗粒度
+            </button>
+<button onclick="window.location.href='CoreQuestion_module3.html'" class="whitespace-nowrap flex items-center gap-2 text-on-surface-variant px-4 py-2.5 rounded-xl font-medium hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined text-lg">psychology</span>
+                性格调色盘
+            </button>
+<button onclick="window.location.href='CoreQuestion_module4.html'" class="whitespace-nowrap flex items-center gap-2 text-on-surface-variant px-4 py-2.5 rounded-xl font-medium hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined text-lg">favorite</span>
+                三观与旷野
+            </button>
+<button onclick="window.location.href='CoreQuestion_module5.html'" class="whitespace-nowrap flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium bg-[#ffdbcd] font-bold shadow-sm">
+<span class="material-symbols-outlined text-lg text-primary">diversity_1</span>
+                亲密关系说明书
+            </button>
+</div>
+<!-- Survey Content Area -->
+<section class="space-y-12">
+<!-- Header -->
+<div class="space-y-3">
+<h1 class="text-4xl font-black tracking-tight text-on-surface">亲密关系说明书</h1>
+<p class="text-on-surface-variant leading-relaxed text-lg max-w-xl">每个人都是一本待翻阅的书，依恋是序章，爱是语言，冲突是章节里的起伏。写下你的“说明书”，不是为了被定义，而是为了让那个读懂你的人，一翻开就知道如何爱你。</p>
+</div>
+<!-- Question Blocks -->
+<div class="space-y-16">
+<!-- Q1 -->
+<section class="space-y-6">
+<label class="text-xl font-bold text-on-surface flex items-center gap-2">
+<span class="w-1.5 h-6 bg-primary-container rounded-full"></span>
+                        1. 在亲密关系中，当你感到压力或与对方产生矛盾时，你通常会？
+                    </label>
+<div class="grid grid-cols-1 gap-4">
+<button class="group p-6 rounded-2xl bg-stone-50/80 text-[#554337] shadow-[0_8px_32px_0_rgba(28,28,24,0.06)] transition-all duration-300 text-left border-2 border-transparent hover:border-primary/20" onclick="const sbs = this.parentElement.querySelectorAll('button'); sbs.forEach(s =&gt; { s.className = 'group p-6 rounded-2xl bg-stone-50/80 text-[#554337] shadow-[0_8px_32px_0_rgba(28,28,24,0.06)] transition-all duration-300 text-left border-2 border-transparent hover:border-primary/20'; }); this.className = 'group p-6 rounded-2xl bg-gradient-to-br from-[#F28C38] to-[#f68a2f] text-white shadow-lg shadow-[#F28C38]/30 transition-all duration-300 text-left border-2 border-transparent';">
+<div class="text-3xl mb-3">🤝</div>
+<div class="font-bold mb-1">安全型</div>
+<div class="text-sm opacity-80">我会主动沟通，坦诚说出自己的感受和需求，相信我们能共同解决。</div>
+</button>
+<button class="group p-6 rounded-2xl bg-stone-50/80 text-[#554337] shadow-[0_8px_32px_0_rgba(28,28,24,0.06)] transition-all duration-300 text-left border-2 border-transparent hover:border-primary/20" onclick="const sbs = this.parentElement.querySelectorAll('button'); sbs.forEach(s =&gt; { s.className = 'group p-6 rounded-2xl bg-stone-50/80 text-[#554337] shadow-[0_8px_32px_0_rgba(28,28,24,0.06)] transition-all duration-300 text-left border-2 border-transparent hover:border-primary/20'; }); this.className = 'group p-6 rounded-2xl bg-gradient-to-br from-[#F28C38] to-[#f68a2f] text-white shadow-lg shadow-[#F28C38]/30 transition-all duration-300 text-left border-2 border-transparent';">
+<div class="text-3xl mb-3">📡</div>
+<div class="font-bold mb-1">焦虑型</div>
+<div class="text-sm opacity-80">我会非常不安，反复试探或追问对方“还爱不爱我”，渴望立刻获得确认和安慰。</div>
+</button>
+<button class="group p-6 rounded-2xl bg-stone-50/80 text-[#554337] shadow-[0_8px_32px_0_rgba(28,28,24,0.06)] transition-all duration-300 text-left border-2 border-transparent hover:border-primary/20" onclick="const sbs = this.parentElement.querySelectorAll('button'); sbs.forEach(s =&gt; { s.className = 'group p-6 rounded-2xl bg-stone-50/80 text-[#554337] shadow-[0_8px_32px_0_rgba(28,28,24,0.06)] transition-all duration-300 text-left border-2 border-transparent hover:border-primary/20'; }); this.className = 'group p-6 rounded-2xl bg-gradient-to-br from-[#F28C38] to-[#f68a2f] text-white shadow-lg shadow-[#F28C38]/30 transition-all duration-300 text-left border-2 border-transparent';">
+<div class="text-3xl mb-3">🏔️</div>
+<div class="font-bold mb-1">回避型</div>
+<div class="text-sm opacity-80">我会觉得喘不过气，本能地想要独处冷静，暂时“躲进洞穴”里，不愿意讨论这个问题。</div>
+</button>
+</div>
+</section>
+<!-- Q2 (Multi-select) -->
+<section class="space-y-6">
+<label class="text-xl font-bold text-on-surface flex items-center gap-2">
+<span class="w-1.5 h-6 bg-primary-container rounded-full"></span>
+                        2. 当你感到被爱或被在乎时，以下哪种场景最让你心动？ (多选)
+                    </label>
+<div class="grid grid-cols-1 gap-4">
+<button class="group p-6 rounded-2xl bg-stone-50/80 text-[#554337] shadow-[0_8px_32px_0_rgba(28,28,24,0.06)] transition-all duration-300 text-left border-2 border-transparent hover:border-primary/20" onclick="this.classList.toggle('multi-select-active')">
+<div class="flex items-center gap-4">
+<div class="text-3xl">🗣️</div>
+<div>
+<div class="font-bold mb-1">肯定的言语</div>
+<div class="text-sm opacity-80">对方认真地夸赞我、发一段真诚的文字表达对我的欣赏。</div>
+</div>
+</div>
+</button>
+<button class="group p-6 rounded-2xl bg-stone-50/80 text-[#554337] shadow-[0_8px_32px_0_rgba(28,28,24,0.06)] transition-all duration-300 text-left border-2 border-transparent hover:border-primary/20" onclick="this.classList.toggle('multi-select-active')">
+<div class="flex items-center gap-4">
+<div class="text-3xl">🧑‍🤝‍🧑</div>
+<div>
+<div class="font-bold mb-1">精心的时刻</div>
+<div class="text-sm opacity-80">对方放下手机，专心陪我散步、聊天，或者一起完成一件小事。</div>
+</div>
+</div>
+</button>
+<button class="group p-6 rounded-2xl bg-stone-50/80 text-[#554337] shadow-[0_8px_32px_0_rgba(28,28,24,0.06)] transition-all duration-300 text-left border-2 border-transparent hover:border-primary/20" onclick="this.classList.toggle('multi-select-active')">
+<div class="flex items-center gap-4">
+<div class="text-3xl">🎁</div>
+<div>
+<div class="font-bold mb-1">接受礼物</div>
+<div class="text-sm opacity-80">对方记得我随口说想要的小东西，或者在特殊日子准备了有意义的礼物。</div>
+</div>
+</div>
+</button>
+<button class="group p-6 rounded-2xl bg-stone-50/80 text-[#554337] shadow-[0_8px_32px_0_rgba(28,28,24,0.06)] transition-all duration-300 text-left border-2 border-transparent hover:border-primary/20" onclick="this.classList.toggle('multi-select-active')">
+<div class="flex items-center gap-4">
+<div class="text-3xl">🫂</div>
+<div>
+<div class="font-bold mb-1">服务的行动</div>
+<div class="text-sm opacity-80">对方在我疲惫时帮我分担琐事（比如取外卖、整理笔记），用行动替我分担压力。</div>
+</div>
+</div>
+</button>
+<button class="group p-6 rounded-2xl bg-stone-50/80 text-[#554337] shadow-[0_8px_32px_0_rgba(28,28,24,0.06)] transition-all duration-300 text-left border-2 border-transparent hover:border-primary/20" onclick="this.classList.toggle('multi-select-active')">
+<div class="flex items-center gap-4">
+<div class="text-3xl">🤗</div>
+<div>
+<div class="font-bold mb-1">身体的接触</div>
+<div class="text-sm opacity-80">对方自然地拍拍我的头、牵手、拥抱，通过肢体接触传递温暖。</div>
+</div>
+</div>
+</button>
+</div>
+</section>
+<!-- Q3 -->
+<section class="space-y-6">
+<label class="text-xl font-bold text-on-surface flex items-center gap-2">
+<span class="w-1.5 h-6 bg-primary-container rounded-full"></span>
+                        3. 在一段亲密关系中，你觉得“个人空间”对你来说意味着什么？
+                    </label>
+<div class="grid grid-cols-1 gap-4">
+<button class="group p-6 rounded-2xl bg-stone-50/80 text-[#554337] shadow-[0_8px_32px_0_rgba(28,28,24,0.06)] transition-all duration-300 text-left border-2 border-transparent hover:border-primary/20" onclick="const sbs = this.parentElement.querySelectorAll('button'); sbs.forEach(s =&gt; { s.className = 'group p-6 rounded-2xl bg-stone-50/80 text-[#554337] shadow-[0_8px_32px_0_rgba(28,28,24,0.06)] transition-all duration-300 text-left border-2 border-transparent hover:border-primary/20'; }); this.className = 'group p-6 rounded-2xl bg-gradient-to-br from-[#F28C38] to-[#f68a2f] text-white shadow-lg shadow-[#F28C38]/30 transition-all duration-300 text-left border-2 border-transparent';">
+<div class="text-3xl mb-3">🔒</div>
+<div class="font-bold mb-1">重要边界</div>
+<div class="text-sm opacity-80">我需要明确的独处时间和私人空间，这能让我保持自我和安全感。</div>
+</button>
+<button class="group p-6 rounded-2xl bg-stone-50/80 text-[#554337] shadow-[0_8px_32px_0_rgba(28,28,24,0.06)] transition-all duration-300 text-left border-2 border-transparent hover:border-primary/20" onclick="const sbs = this.parentElement.querySelectorAll('button'); sbs.forEach(s =&gt; { s.className = 'group p-6 rounded-2xl bg-stone-50/80 text-[#554337] shadow-[0_8px_32px_0_rgba(28,28,24,0.06)] transition-all duration-300 text-left border-2 border-transparent hover:border-primary/20'; }); this.className = 'group p-6 rounded-2xl bg-gradient-to-br from-[#F28C38] to-[#f68a2f] text-white shadow-lg shadow-[#F28C38]/30 transition-all duration-300 text-left border-2 border-transparent';">
+<div class="text-3xl mb-3">🔗</div>
+<div class="font-bold mb-1">共享融合</div>
+<div class="text-sm opacity-80">我更喜欢两个人做什么都在一起，独处时反而容易感到孤单或胡思乱想。</div>
+</button>
+<button class="group p-6 rounded-2xl bg-stone-50/80 text-[#554337] shadow-[0_8px_32px_0_rgba(28,28,24,0.06)] transition-all duration-300 text-left border-2 border-transparent hover:border-primary/20" onclick="const sbs = this.parentElement.querySelectorAll('button'); sbs.forEach(s =&gt; { s.className = 'group p-6 rounded-2xl bg-stone-50/80 text-[#554337] shadow-[0_8px_32px_0_rgba(28,28,24,0.06)] transition-all duration-300 text-left border-2 border-transparent hover:border-primary/20'; }); this.className = 'group p-6 rounded-2xl bg-gradient-to-br from-[#F28C38] to-[#f68a2f] text-white shadow-lg shadow-[#F28C38]/30 transition-all duration-300 text-left border-2 border-transparent';">
+<div class="text-3xl mb-3">⚖️</div>
+<div class="font-bold mb-1">动态平衡</div>
+<div class="text-sm opacity-80">看状态而定，状态好时可以各自独立，低落时会更依赖对方陪伴。</div>
+</button>
+</div>
+</section>
+<!-- Q4 -->
+<section class="space-y-6">
+<label class="text-xl font-bold text-on-surface flex items-center gap-2">
+<span class="w-1.5 h-6 bg-primary-container rounded-full"></span>
+                        4. 当你感到情绪低落或疲惫时，你更希望伴侣怎么做？
+                    </label>
+<div class="grid grid-cols-1 gap-4">
+<button class="group p-6 rounded-2xl bg-stone-50/80 text-[#554337] shadow-[0_8px_32px_0_rgba(28,28,24,0.06)] transition-all duration-300 text-left border-2 border-transparent hover:border-primary/20" onclick="const sbs = this.parentElement.querySelectorAll('button'); sbs.forEach(s =&gt; { s.className = 'group p-6 rounded-2xl bg-stone-50/80 text-[#554337] shadow-[0_8px_32px_0_rgba(28,28,24,0.06)] transition-all duration-300 text-left border-2 border-transparent hover:border-primary/20'; }); this.className = 'group p-6 rounded-2xl bg-gradient-to-br from-[#F28C38] to-[#f68a2f] text-white shadow-lg shadow-[#F28C38]/30 transition-all duration-300 text-left border-2 border-transparent';">
+<div class="text-3xl mb-3">🫂</div>
+<div class="font-bold mb-1">陪伴倾听</div>
+<div class="text-sm opacity-80">什么都不用说，安静地陪着我，听我倾诉就好。</div>
+</button>
+<button class="group p-6 rounded-2xl bg-stone-50/80 text-[#554337] shadow-[0_8px_32px_0_rgba(28,28,24,0.06)] transition-all duration-300 text-left border-2 border-transparent hover:border-primary/20" onclick="const sbs = this.parentElement.querySelectorAll('button'); sbs.forEach(s =&gt; { s.className = 'group p-6 rounded-2xl bg-stone-50/80 text-[#554337] shadow-[0_8px_32px_0_rgba(28,28,24,0.06)] transition-all duration-300 text-left border-2 border-transparent hover:border-primary/20'; }); this.className = 'group p-6 rounded-2xl bg-gradient-to-br from-[#F28C38] to-[#f68a2f] text-white shadow-lg shadow-[#F28C38]/30 transition-all duration-300 text-left border-2 border-transparent';">
+<div class="text-3xl mb-3">💡</div>
+<div class="font-bold mb-1">理性分析</div>
+<div class="text-sm opacity-80">帮我一起梳理问题，给出建议或解决方案，带我走出困境。</div>
+</button>
+<button class="group p-6 rounded-2xl bg-stone-50/80 text-[#554337] shadow-[0_8px_32px_0_rgba(28,28,24,0.06)] transition-all duration-300 text-left border-2 border-transparent hover:border-primary/20" onclick="const sbs = this.parentElement.querySelectorAll('button'); sbs.forEach(s =&gt; { s.className = 'group p-6 rounded-2xl bg-stone-50/80 text-[#554337] shadow-[0_8px_32px_0_rgba(28,28,24,0.06)] transition-all duration-300 text-left border-2 border-transparent hover:border-primary/20'; }); this.className = 'group p-6 rounded-2xl bg-gradient-to-br from-[#F28C38] to-[#f68a2f] text-white shadow-lg shadow-[#F28C38]/30 transition-all duration-300 text-left border-2 border-transparent';">
+<div class="text-3xl mb-3">🎉</div>
+<div class="font-bold mb-1">转移注意力</div>
+<div class="text-sm opacity-80">带我出去走走、吃好吃的、看轻松的内容，让我暂时忘掉烦恼。</div>
+</button>
+<button class="group p-6 rounded-2xl bg-stone-50/80 text-[#554337] shadow-[0_8px_32px_0_rgba(28,28,24,0.06)] transition-all duration-300 text-left border-2 border-transparent hover:border-primary/20" onclick="const sbs = this.parentElement.querySelectorAll('button'); sbs.forEach(s =&gt; { s.className = 'group p-6 rounded-2xl bg-stone-50/80 text-[#554337] shadow-[0_8px_32px_0_rgba(28,28,24,0.06)] transition-all duration-300 text-left border-2 border-transparent hover:border-primary/20'; }); this.className = 'group p-6 rounded-2xl bg-gradient-to-br from-[#F28C38] to-[#f68a2f] text-white shadow-lg shadow-[#F28C38]/30 transition-all duration-300 text-left border-2 border-transparent';">
+<div class="text-3xl mb-3">🚪</div>
+<div class="font-bold mb-1">尊重独处</div>
+<div class="text-sm opacity-80">给我空间自己消化，等我状态恢复后再聊。</div>
+</button>
+</div>
+</section>
+<!-- Q5 -->
+<section class="space-y-6">
+<label class="text-xl font-bold text-on-surface flex items-center gap-2">
+<span class="w-1.5 h-6 bg-primary-container rounded-full"></span>
+                        5. 你觉得一段关系中，“安全感”主要来源于什么？
+                    </label>
+<div class="grid grid-cols-1 gap-4">
+<button class="group p-6 rounded-2xl bg-stone-50/80 text-[#554337] shadow-[0_8px_32px_0_rgba(28,28,24,0.06)] transition-all duration-300 text-left border-2 border-transparent hover:border-primary/20" onclick="const sbs = this.parentElement.querySelectorAll('button'); sbs.forEach(s =&gt; { s.className = 'group p-6 rounded-2xl bg-stone-50/80 text-[#554337] shadow-[0_8px_32px_0_rgba(28,28,24,0.06)] transition-all duration-300 text-left border-2 border-transparent hover:border-primary/20'; }); this.className = 'group p-6 rounded-2xl bg-gradient-to-br from-[#F28C38] to-[#f68a2f] text-white shadow-lg shadow-[#F28C38]/30 transition-all duration-300 text-left border-2 border-transparent';">
+<div class="text-3xl mb-3">✅</div>
+<div class="font-bold mb-1">确定性</div>
+<div class="text-sm opacity-80">对方的言行一致、承诺兑现、消息及时回复，让我感到可预测。</div>
+</button>
+<button class="group p-6 rounded-2xl bg-stone-50/80 text-[#554337] shadow-[0_8px_32px_0_rgba(28,28,24,0.06)] transition-all duration-300 text-left border-2 border-transparent hover:border-primary/20" onclick="const sbs = this.parentElement.querySelectorAll('button'); sbs.forEach(s =&gt; { s.className = 'group p-6 rounded-2xl bg-stone-50/80 text-[#554337] shadow-[0_8px_32px_0_rgba(28,28,24,0.06)] transition-all duration-300 text-left border-2 border-transparent hover:border-primary/20'; }); this.className = 'group p-6 rounded-2xl bg-gradient-to-br from-[#F28C38] to-[#f68a2f] text-white shadow-lg shadow-[#F28C38]/30 transition-all duration-300 text-left border-2 border-transparent';">
+<div class="text-3xl mb-3">🔗</div>
+<div class="font-bold mb-1">包容度</div>
+<div class="text-sm opacity-80">即使我犯错或状态不好，对方依然接纳我，不会轻易离开。</div>
+</button>
+<button class="group p-6 rounded-2xl bg-stone-50/80 text-[#554337] shadow-[0_8px_32px_0_rgba(28,28,24,0.06)] transition-all duration-300 text-left border-2 border-transparent hover:border-primary/20" onclick="const sbs = this.parentElement.querySelectorAll('button'); sbs.forEach(s =&gt; { s.className = 'group p-6 rounded-2xl bg-stone-50/80 text-[#554337] shadow-[0_8px_32px_0_rgba(28,28,24,0.06)] transition-all duration-300 text-left border-2 border-transparent hover:border-primary/20'; }); this.className = 'group p-6 rounded-2xl bg-gradient-to-br from-[#F28C38] to-[#f68a2f] text-white shadow-lg shadow-[#F28C38]/30 transition-all duration-300 text-left border-2 border-transparent';">
+<div class="text-3xl mb-3">🌐</div>
+<div class="font-bold mb-1">社交融入</div>
+<div class="text-sm opacity-80">对方愿意把我介绍给朋友家人，让我进入ta的生活圈。</div>
+</button>
+<button class="group p-6 rounded-2xl bg-stone-50/80 text-[#554337] shadow-[0_8px_32px_0_rgba(28,28,24,0.06)] transition-all duration-300 text-left border-2 border-transparent hover:border-primary/20" onclick="const sbs = this.parentElement.querySelectorAll('button'); sbs.forEach(s =&gt; { s.className = 'group p-6 rounded-2xl bg-stone-50/80 text-[#554337] shadow-[0_8px_32px_0_rgba(28,28,24,0.06)] transition-all duration-300 text-left border-2 border-transparent hover:border-primary/20'; }); this.className = 'group p-6 rounded-2xl bg-gradient-to-br from-[#F28C38] to-[#f68a2f] text-white shadow-lg shadow-[#F28C38]/30 transition-all duration-300 text-left border-2 border-transparent';">
+<div class="text-3xl mb-3">🛡️</div>
+<div class="font-bold mb-1">边界清晰</div>
+<div class="text-sm opacity-80">对方能明确拒绝暧昧，不让我产生不必要的猜疑。</div>
+</button>
+</div>
+</section>
+<!-- Q6 -->
+<section class="space-y-6">
+<label class="text-xl font-bold text-on-surface flex items-center gap-2">
+<span class="w-1.5 h-6 bg-primary-container rounded-full"></span>
+                        6. 在关系中，你更容易因为什么而感到“被消耗”？
+                    </label>
+<div class="grid grid-cols-1 gap-4">
+<button class="group p-6 rounded-2xl bg-stone-50/80 text-[#554337] shadow-[0_8px_32px_0_rgba(28,28,24,0.06)] transition-all duration-300 text-left border-2 border-transparent hover:border-primary/20" onclick="const sbs = this.parentElement.querySelectorAll('button'); sbs.forEach(s =&gt; { s.className = 'group p-6 rounded-2xl bg-stone-50/80 text-[#554337] shadow-[0_8px_32px_0_rgba(28,28,24,0.06)] transition-all duration-300 text-left border-2 border-transparent hover:border-primary/20'; }); this.className = 'group p-6 rounded-2xl bg-gradient-to-br from-[#F28C38] to-[#f68a2f] text-white shadow-lg shadow-[#F28C38]/30 transition-all duration-300 text-left border-2 border-transparent';">
+<div class="text-3xl mb-3">🗣️</div>
+<div class="font-bold mb-1">无效沟通</div>
+<div class="text-sm opacity-80">反复争吵同样的问题，或对方总是回避沟通。</div>
+</button>
+<button class="group p-6 rounded-2xl bg-stone-50/80 text-[#554337] shadow-[0_8px_32px_0_rgba(28,28,24,0.06)] transition-all duration-300 text-left border-2 border-transparent hover:border-primary/20" onclick="const sbs = this.parentElement.querySelectorAll('button'); sbs.forEach(s =&gt; { s.className = 'group p-6 rounded-2xl bg-stone-50/80 text-[#554337] shadow-[0_8px_32px_0_rgba(28,28,24,0.06)] transition-all duration-300 text-left border-2 border-transparent hover:border-primary/20'; }); this.className = 'group p-6 rounded-2xl bg-gradient-to-br from-[#F28C38] to-[#f68a2f] text-white shadow-lg shadow-[#F28C38]/30 transition-all duration-300 text-left border-2 border-transparent';">
+<div class="text-3xl mb-3">📉</div>
+<div class="font-bold mb-1">情绪过载</div>
+<div class="text-sm opacity-80">需要不断承接对方的负面情绪，自己也被拖垮。</div>
+</button>
+<button class="group p-6 rounded-2xl bg-stone-50/80 text-[#554337] shadow-[0_8px_32px_0_rgba(28,28,24,0.06)] transition-all duration-300 text-left border-2 border-transparent hover:border-primary/20" onclick="const sbs = this.parentElement.querySelectorAll('button'); sbs.forEach(s =&gt; { s.className = 'group p-6 rounded-2xl bg-stone-50/80 text-[#554337] shadow-[0_8px_32px_0_rgba(28,28,24,0.06)] transition-all duration-300 text-left border-2 border-transparent hover:border-primary/20'; }); this.className = 'group p-6 rounded-2xl bg-gradient-to-br from-[#F28C38] to-[#f68a2f] text-white shadow-lg shadow-[#F28C38]/30 transition-all duration-300 text-left border-2 border-transparent';">
+<div class="text-3xl mb-3">⚖️</div>
+<div class="font-bold mb-1">付出失衡</div>
+<div class="text-sm opacity-80">感觉总是自己在主动维系关系，对方回应冷淡。</div>
+</button>
+<button class="group p-6 rounded-2xl bg-stone-50/80 text-[#554337] shadow-[0_8px_32px_0_rgba(28,28,24,0.06)] transition-all duration-300 text-left border-2 border-transparent hover:border-primary/20" onclick="const sbs = this.parentElement.querySelectorAll('button'); sbs.forEach(s =&gt; { s.className = 'group p-6 rounded-2xl bg-stone-50/80 text-[#554337] shadow-[0_8px_32px_0_rgba(28,28,24,0.06)] transition-all duration-300 text-left border-2 border-transparent hover:border-primary/20'; }); this.className = 'group p-6 rounded-2xl bg-gradient-to-br from-[#F28C38] to-[#f68a2f] text-white shadow-lg shadow-[#F28C38]/30 transition-all duration-300 text-left border-2 border-transparent';">
+<div class="text-3xl mb-3">🎭</div>
+<div class="font-bold mb-1">自我压缩</div>
+<div class="text-sm opacity-80">为了迁就对方，不得不压抑自己的需求和喜好。</div>
+</button>
+</div>
+</section>
+<!-- Additional Module -->
+<!-- Q7 (Multi-select) -->
+<section class="space-y-6">
+<label class="text-xl font-bold text-on-surface flex items-center gap-2">
+<span class="w-1.5 h-6 bg-primary-container rounded-full"></span>
+                        7. 你更希望亲密关系带给你的核心感受是？ (多选)
+                    </label>
+<div class="grid grid-cols-1 gap-4">
+<button class="group p-6 rounded-2xl bg-stone-50/80 text-[#554337] shadow-[0_8px_32px_0_rgba(28,28,24,0.06)] transition-all duration-300 text-left border-2 border-transparent hover:border-primary/20" onclick="this.classList.toggle('multi-select-active')">
+<div class="flex items-center gap-4">
+<div class="text-3xl">🏠</div>
+<div>
+<div class="font-bold mb-1">归属感</div>
+<div class="text-sm opacity-80">有一个随时可以回去的“港湾”，知道自己不是一个人。</div>
+</div>
+</div>
+</button>
+<button class="group p-6 rounded-2xl bg-stone-50/80 text-[#554337] shadow-[0_8px_32px_0_rgba(28,28,24,0.06)] transition-all duration-300 text-left border-2 border-transparent hover:border-primary/20" onclick="this.classList.toggle('multi-select-active')">
+<div class="flex items-center gap-4">
+<div class="text-3xl">🚀</div>
+<div>
+<div class="font-bold mb-1">成长感</div>
+<div class="text-sm opacity-80">互相激励，成为更好的自己，共同探索更大的世界。</div>
+</div>
+</div>
+</button>
+<button class="group p-6 rounded-2xl bg-stone-50/80 text-[#554337] shadow-[0_8px_32px_0_rgba(28,28,24,0.06)] transition-all duration-300 text-left border-2 border-transparent hover:border-primary/20" onclick="this.classList.toggle('multi-select-active')">
+<div class="flex items-center gap-4">
+<div class="text-3xl">🎭</div>
+<div>
+<div class="font-bold mb-1">松弛感</div>
+<div class="text-sm opacity-80">在彼此面前可以完全做自己，不用伪装，不用费力。</div>
+</div>
+</div>
+</button>
+<button class="group p-6 rounded-2xl bg-stone-50/80 text-[#554337] shadow-[0_8px_32px_0_rgba(28,28,24,0.06)] transition-all duration-300 text-left border-2 border-transparent hover:border-primary/20" onclick="this.classList.toggle('multi-select-active')">
+<div class="flex items-center gap-4">
+<div class="text-3xl">🔥</div>
+<div>
+<div class="font-bold mb-1">激情感</div>
+<div class="text-sm opacity-80">保持心动、新鲜感和浪漫，不让关系变得平淡。</div>
+</div>
+</div>
+</button>
+</div>
+</section>
+</div>
+<!-- Action Area -->
+<div class="pt-12 flex justify-center flex-col items-center gap-4">
+<button onclick="window.location.href='Waiting.html'" class="w-full py-5 rounded-full bg-gradient-to-br from-[#F28C38] to-[#f68a2f] text-white font-black tracking-widest text-lg shadow-xl shadow-[#F28C38]/30 active:scale-95 transition-all">完成并生成结果报告</button>
+<button class="w-full py-5 rounded-full bg-surface-container-high text-on-surface font-black tracking-widest text-lg active:scale-95 transition-all">
+                    暂存进度
+                </button>
+</div>
+</section>
+</main>
+<!-- Updated Mobile Navigation (Bottom Nav) Consistent with Home Screen -->
+<div class="md:hidden fixed bottom-4 left-1/2 -translate-x-1/2 w-[92%] z-[110]">
+<nav class="glass-panel py-3 px-6 rounded-3xl shadow-2xl flex justify-between items-center backdrop-blur-3xl border-orange-100/30">
+<a class="flex flex-col items-center gap-1 text-on-surface-variant/60 hover:text-orange-600 transition-colors" href="index.html">
+<span class="material-symbols-outlined text-[24px]">home</span>
+<span class="text-[10px] font-bold">首页</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-orange-700" href="CoreQuestion_module1.html">
+<span class="material-symbols-outlined text-[24px]" style="font-variation-settings: 'FILL' 1;">quiz</span>
+<span class="text-[10px] font-bold">问卷</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-on-surface-variant/60 hover:text-orange-600 transition-colors" href="Waiting.html">
+<span class="material-symbols-outlined text-[24px]">person_search</span>
+<span class="text-[10px] font-bold">我的匹配</span>
+</a>
+</nav>
+</div>
+</body></html>
