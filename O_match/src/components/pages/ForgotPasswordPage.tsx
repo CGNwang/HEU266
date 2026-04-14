@@ -46,7 +46,7 @@ const ForgotPasswordPage: React.FC = () => {
       const result = await sendPasswordResetEmail(buildHrbeuEmail(normalizedPrefix));
       if (result.success) {
         setHint(result.message || '重置密码邮件已发送，请前往邮箱查收');
-        setCooldownSeconds(60);
+        setCooldownSeconds(30);
         if (cooldownTimerRef.current) {
           window.clearInterval(cooldownTimerRef.current);
         }

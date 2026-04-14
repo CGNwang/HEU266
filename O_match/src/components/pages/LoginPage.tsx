@@ -112,7 +112,7 @@ const LoginPage: React.FC = () => {
               <div className="relative group">
                 <input
                   className="w-full bg-surface-container-low border-none rounded-2xl py-4 px-6 text-on-surface placeholder:text-outline/40 focus:ring-0 focus:bg-surface-container-lowest transition-all duration-300 ghost-border"
-                  placeholder="••••••••"
+                  placeholder="密码"
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}

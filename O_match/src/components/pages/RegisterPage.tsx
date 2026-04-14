@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { registerWithEmailCode, sendRegisterEmailCode } from '@/services/authService';
+import { PASSWORD_RULE_MESSAGE, isValidPassword } from '@/utils/password';
 
 const HRBEU_EMAIL_MESSAGE = '仅支持 HEU 校园邮箱';
 const HRBEU_EMAIL_SUFFIX = '@hrbeu.edu.cn';
@@ -67,7 +68,7 @@ const RegisterPage: React.FC = () => {
       const result = await sendRegisterEmailCode(buildHrbeuEmail(normalizedEmailPrefix));
       if (result.success) {
         setHint(result.message || '验证码已发送，请前往邮箱查收');
-        setCodeCooldown(60);
+        setCodeCooldown(30);
       } else {
         setError(result.message || '验证码发送失败');
       }
@@ -100,8 +101,8 @@ const RegisterPage: React.FC = () => {
       return;
     }
 
-    if (password.length < 6) {
-      setError('密码长度至少为6位');
+    if (!isValidPassword(password)) {
+      setError(PASSWORD_RULE_MESSAGE);
       return;
     }
 
@@ -206,7 +207,7 @@ const RegisterPage: React.FC = () => {
               <div className="relative group">
                 <input
                   className="w-full bg-surface-container-low border-none rounded-2xl py-4 px-6 pr-20 text-on-surface placeholder:text-outline/40 focus:ring-0 focus:bg-surface-container-lowest transition-all duration-300 ghost-border"
-                  placeholder="••••••••"
+                  placeholder="密码"
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -223,6 +224,7 @@ const RegisterPage: React.FC = () => {
                   </span>
                 </button>
               </div>
+              <p className="text-xs text-on-surface-variant ml-4">{PASSWORD_RULE_MESSAGE}</p>
             </div>
 
             {/* Confirm Password Field */}
@@ -231,7 +233,7 @@ const RegisterPage: React.FC = () => {
               <div className="relative group">
                 <input
                   className="w-full bg-surface-container-low border-none rounded-2xl py-4 px-6 pr-20 text-on-surface placeholder:text-outline/40 focus:ring-0 focus:bg-surface-container-lowest transition-all duration-300 ghost-border"
-                  placeholder="••••••••"
+                  placeholder="确认密码"
                   type={showConfirmPassword ? 'text' : 'password'}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
