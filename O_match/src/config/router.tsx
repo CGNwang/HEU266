@@ -6,6 +6,8 @@ import { Layout } from '@/components/layout';
 const HomePage = lazy(() => import('@/components/pages/HomePage'));
 const LoginPage = lazy(() => import('@/components/pages/LoginPage'));
 const RegisterPage = lazy(() => import('@/components/pages/RegisterPage'));
+const TermsOfServicePage = lazy(() => import('@/components/pages/TermsOfServicePage'));
+const PrivacyPolicyPage = lazy(() => import('@/components/pages/PrivacyPolicyPage'));
 const ForgotPasswordPage = lazy(() => import('@/components/pages/ForgotPasswordPage'));
 const ResetPasswordPage = lazy(() => import('@/components/pages/ResetPasswordPage'));
 const ChangePasswordPage = lazy(() => import('@/components/pages/ChangePasswordPage'));
@@ -112,6 +114,14 @@ export const router = createBrowserRouter([
       {
         path: '/register',
         element: renderLazy(RegisterPage),
+      },
+      {
+        path: '/terms',
+        element: renderLazy(TermsOfServicePage),
+      },
+      {
+        path: '/privacy',
+        element: renderLazy(PrivacyPolicyPage),
       },
       {
         path: '/forgot-password',

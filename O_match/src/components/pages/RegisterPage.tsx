@@ -283,7 +283,7 @@ const RegisterPage: React.FC = () => {
           {/* Bottom Guide */}
           <div className="pt-8 border-t border-orange-100/30 w-full mt-10">
             <p className="text-[12px] text-on-surface-variant/60 leading-relaxed mb-6">
-              注册即代表同意 <a className="text-primary hover:underline underline-offset-4" href="#">《服务条款》</a> 与 <a className="text-primary hover:underline underline-offset-4" href="#">《隐私政策》</a>
+              注册即代表同意 <Link className="text-primary hover:underline underline-offset-4" to="/terms">《服务条款》</Link> 与 <Link className="text-primary hover:underline underline-offset-4" to="/privacy">《隐私政策》</Link>
             </p>
             <p className="text-sm font-medium text-on-surface-variant">
               已有账号？<Link to="/login" className="text-secondary font-bold hover:opacity-80 transition-opacity ml-1">立即登录</Link>
