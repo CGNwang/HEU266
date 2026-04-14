@@ -16,6 +16,7 @@ const MatchReportPage = lazy(() => import('@/components/pages/MatchReportPage'))
 const ChatRoomPage = lazy(() => import('@/components/pages/ChatRoomPage'));
 const QuestionnairePage = lazy(() => import('@/components/pages/QuestionnaireWrapper'));
 const ProfilePage = lazy(() => import('@/components/pages/ProfilePage'));
+const NotificationSettingsPage = lazy(() => import('@/components/pages/NotificationSettingsPage'));
 const QuestionnaireRequiredPage = lazy(() => import('@/components/pages/QuestionnaireRequiredPage'));
 const SecurityPage = lazy(() => import('@/components/pages/SecurityPage'));
 const BindInfoPage = lazy(() => import('@/components/pages/BindInfoPage'));
@@ -85,6 +86,10 @@ export const router = createBrowserRouter([
           {
             path: 'profile',
             element: renderLazy(ProfilePage),
+          },
+          {
+            path: 'notifications',
+            element: renderLazy(NotificationSettingsPage),
           },
           {
             path: 'security',
