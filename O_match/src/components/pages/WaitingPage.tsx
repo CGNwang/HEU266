@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import { getMatchingStatus, joinMatching, cancelMatching } from '@/services/matchingService';
 
 const WaitingPage: React.FC = () => {
@@ -128,6 +129,25 @@ const WaitingPage: React.FC = () => {
               )}
             </div>
           </button>
+        </div>
+
+        {/* TEST ONLY: 便于联调匹配结果页入口，测试完成后请删除此区块 */}
+        <div className="w-full mt-6 border-t border-white/40 pt-5">
+          <p className="text-[10px] uppercase tracking-wider text-on-surface-variant font-bold mb-3">测试跳转</p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Link
+              to="/match-success"
+              className="px-5 py-3 rounded-full bg-surface-container-high text-on-surface font-bold hover:bg-surface-container-low transition-colors"
+            >
+              测试：匹配成功页
+            </Link>
+            <Link
+              to="/match-fail"
+              className="px-5 py-3 rounded-full bg-surface-container-high text-on-surface font-bold hover:bg-surface-container-low transition-colors"
+            >
+              测试：匹配失败页
+            </Link>
+          </div>
         </div>
       </div>
 
