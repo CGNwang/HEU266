@@ -42,7 +42,7 @@ const LoginPage: React.FC = () => {
       const result = await login({ username, email, password });
 
       if (result.success) {
-        navigate('/questionnaire');
+        navigate('/questionnaire/1', { replace: true });
       } else {
         setError(result.message || '登录失败');
       }
