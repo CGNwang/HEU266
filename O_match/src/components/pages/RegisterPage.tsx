@@ -5,6 +5,10 @@ import { PASSWORD_RULE_MESSAGE, isValidPassword } from '@/utils/password';
 
 const HRBEU_EMAIL_MESSAGE = '仅支持 HEU 校园邮箱';
 const HRBEU_EMAIL_SUFFIX = '@hrbeu.edu.cn';
+const EMAIL_CODE_COOLDOWN_SECONDS = 30;
+
+const isRateLimitedError = (message?: string) =>
+  Boolean(message && (message.includes('过于频繁') || message.toLowerCase().includes('rate')));
 
 const RegisterPage: React.FC = () => {
   const navigate = useNavigate();
@@ -64,16 +68,21 @@ const RegisterPage: React.FC = () => {
     }
 
     setSendingCode(true);
+    setCodeCooldown(EMAIL_CODE_COOLDOWN_SECONDS);
     try {
       const result = await sendRegisterEmailCode(buildHrbeuEmail(normalizedEmailPrefix));
       if (result.success) {
         setHint(result.message || '验证码已发送，请前往邮箱查收');
-        setCodeCooldown(30);
       } else {
-        setError(result.message || '验证码发送失败');
+        const message = result.message || '验证码发送失败';
+        setError(message);
+        if (!isRateLimitedError(message)) {
+          setCodeCooldown(0);
+        }
       }
     } catch {
       setError('验证码发送失败，请稍后重试');
+      setCodeCooldown(0);
     } finally {
       setSendingCode(false);
     }
@@ -196,7 +205,7 @@ const RegisterPage: React.FC = () => {
                   onClick={handleSendCode}
                   disabled={sendingCode || codeCooldown > 0}
                 >
-                  {sendingCode ? '发送中...' : codeCooldown > 0 ? `${codeCooldown}s后重发` : '获取验证码'}
+                  {codeCooldown > 0 ? `${codeCooldown}s后重发` : sendingCode ? '发送中...' : '获取验证码'}
                 </button>
               </div>
             </div>
