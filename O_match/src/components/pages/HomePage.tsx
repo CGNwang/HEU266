@@ -156,7 +156,13 @@ const HomePage: React.FC = () => {
             <span>开启我的灵魂盲盒</span>
           </Link>
         </div>
-        <footer className="mt-8 text-center pb-32 md:pb-12">
+        <footer className="mt-8 text-center pb-72 md:pb-64">
+          <Link
+            to="/feedback"
+            className="inline-block text-orange-600 hover:text-orange-700 font-medium text-xs md:text-sm mb-4 transition-colors"
+          >
+            联系我们
+          </Link>
           <p className="text-on-surface-variant/40 text-[10px] md:text-sm">© 2024 🍊意配 | HEU 校园专属社交实验</p>
         </footer>
       </div>

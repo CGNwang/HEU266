@@ -23,6 +23,7 @@ const QuestionnaireRequiredPage = lazy(() => import('@/components/pages/Question
 const SecurityPage = lazy(() => import('@/components/pages/SecurityPage'));
 const BindInfoPage = lazy(() => import('@/components/pages/BindInfoPage'));
 const DonatePage = lazy(() => import('@/components/pages/DonatePage'));
+const FeedbackPage = lazy(() => import('@/components/pages/FeedbackPage'));
 
 const renderLazy = (Component: LazyExoticComponent<ComponentType>) => (
   <Suspense fallback={<div className="min-h-screen flex items-center justify-center text-on-surface-variant">加载中...</div>}>
@@ -104,6 +105,10 @@ export const router = createBrowserRouter([
           {
             path: 'donate',
             element: renderLazy(DonatePage),
+          },
+          {
+            path: 'feedback',
+            element: renderLazy(FeedbackPage),
           },
         ],
       },
