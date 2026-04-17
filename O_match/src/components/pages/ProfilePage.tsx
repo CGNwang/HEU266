@@ -85,6 +85,18 @@ const ProfilePage: React.FC = () => {
               <span className="material-symbols-outlined text-outline-variant group-hover:translate-x-1 transition-transform">chevron_right</span>
             </Link>
 
+            {/* Contact Methods Card */}
+            <Link to="/contact-methods" className="flex items-center p-6 bg-surface-container-low hover:bg-surface-container-lowest transition-all duration-300 rounded-[1.5rem] group text-left">
+              <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-primary shadow-sm group-hover:scale-110 transition-transform">
+                <span className="material-symbols-outlined">perm_contact_calendar</span>
+              </div>
+              <div className="ml-4 flex-1">
+                <div className="text-on-surface font-bold">联系方式管理</div>
+                <div className="text-on-surface-variant text-sm">微信、QQ、抖音快捷交换</div>
+              </div>
+              <span className="material-symbols-outlined text-outline-variant group-hover:translate-x-1 transition-transform">chevron_right</span>
+            </Link>
+
             {/* Project Donation Card */}
             <Link to="/donate" className="flex items-center p-6 bg-surface-container-low hover:bg-surface-container-lowest transition-all duration-300 rounded-[1.5rem] group text-left">
               <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-primary shadow-sm group-hover:scale-110 transition-transform">

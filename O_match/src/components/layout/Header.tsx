@@ -29,7 +29,7 @@ export const Header: React.FC<HeaderProps> = ({ className }) => {
   };
 
   const getTargetPath = (path: string) => {
-    const protectedPaths = new Set(['/questionnaire', '/waiting', '/chat', '/profile']);
+    const protectedPaths = new Set(['/questionnaire', '/waiting', '/chat', '/chat-entry', '/profile']);
     if (!isAuthenticated && protectedPaths.has(path)) {
       return '/login';
     }
@@ -78,7 +78,7 @@ export const Header: React.FC<HeaderProps> = ({ className }) => {
       {/* Right Icons */}
       <div className="flex items-center gap-2 md:gap-4 text-orange-600 dark:text-orange-400">
         <Link
-          to={getTargetPath('/chat')}
+          to={getTargetPath('/chat-entry')}
           className="p-2 hover:bg-orange-50/50 dark:hover:bg-stone-800/50 rounded-lg transition-all active:scale-95"
         >
           <span className="material-symbols-outlined text-2xl">notifications</span>
