@@ -1,7 +1,8 @@
-import { Suspense, lazy, useEffect } from 'react';
+import { Suspense, lazy, useEffect, useState } from 'react';
 import type { ComponentType, LazyExoticComponent } from 'react';
 import { createBrowserRouter, Navigate, Outlet, useLocation } from 'react-router-dom';
 import { Layout } from '@/components/layout';
+import { getCurrentUser } from '@/services/authService';
 
 const HomePage = lazy(() => import('@/components/pages/HomePage'));
 const LoginPage = lazy(() => import('@/components/pages/LoginPage'));
@@ -43,6 +44,41 @@ const ScrollToTopOnNavigate = () => {
   return <Outlet />;
 };
 
+const RequireAuth = () => {
+  const location = useLocation();
+  const [checking, setChecking] = useState(true);
+  const [isAuthed, setIsAuthed] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+
+    const verifyAuth = async () => {
+      const user = await getCurrentUser();
+      if (!active) {
+        return;
+      }
+      setIsAuthed(Boolean(user));
+      setChecking(false);
+    };
+
+    void verifyAuth();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  if (checking) {
+    return <div className="min-h-screen flex items-center justify-center text-on-surface-variant">认证中...</div>;
+  }
+
+  if (!isAuthed) {
+    return <Navigate to="/login" state={{ from: `${location.pathname}${location.search}` }} replace />;
+  }
+
+  return <Outlet />;
+};
+
 // 路由配置
 export const router = createBrowserRouter([
   {
@@ -57,68 +93,73 @@ export const router = createBrowserRouter([
             element: renderLazy(HomePage),
           },
           {
-            path: 'questionnaire',
-            element: renderLazy(QuestionnairePage),
-          },
-          {
-            path: 'questionnaire/:moduleId',
-            element: renderLazy(QuestionnairePage),
-          },
-          {
-            path: 'waiting',
-            element: renderLazy(WaitingPage),
-          },
-          {
-            path: 'questionnaire-required',
-            element: renderLazy(QuestionnaireRequiredPage),
-          },
-          {
-            path: 'match-success',
-            element: renderLazy(MatchSuccessPage),
-          },
-          {
-            path: 'match-fail',
-            element: renderLazy(MatchFailPage),
-          },
-          {
-            path: 'match-report',
-            element: renderLazy(MatchReportPage),
-          },
-          {
-            path: 'chat',
-            element: renderLazy(ChatRoomPage),
-          },
-          {
-            path: 'chat-entry',
-            element: renderLazy(ChatEntryPage),
-          },
-          {
-            path: 'profile',
-            element: renderLazy(ProfilePage),
-          },
-          {
-            path: 'notifications',
-            element: renderLazy(NotificationSettingsPage),
-          },
-          {
-            path: 'security',
-            element: renderLazy(SecurityPage),
-          },
-          {
-            path: 'bind-info',
-            element: renderLazy(BindInfoPage),
-          },
-          {
-            path: 'donate',
-            element: renderLazy(DonatePage),
-          },
-          {
             path: 'feedback',
             element: renderLazy(FeedbackPage),
           },
           {
-            path: 'contact-methods',
-            element: renderLazy(ContactMethodsPage),
+            element: <RequireAuth />,
+            children: [
+              {
+                path: 'questionnaire',
+                element: renderLazy(QuestionnairePage),
+              },
+              {
+                path: 'questionnaire/:moduleId',
+                element: renderLazy(QuestionnairePage),
+              },
+              {
+                path: 'waiting',
+                element: renderLazy(WaitingPage),
+              },
+              {
+                path: 'questionnaire-required',
+                element: renderLazy(QuestionnaireRequiredPage),
+              },
+              {
+                path: 'match-success',
+                element: renderLazy(MatchSuccessPage),
+              },
+              {
+                path: 'match-fail',
+                element: renderLazy(MatchFailPage),
+              },
+              {
+                path: 'match-report',
+                element: renderLazy(MatchReportPage),
+              },
+              {
+                path: 'chat',
+                element: renderLazy(ChatRoomPage),
+              },
+              {
+                path: 'chat-entry',
+                element: renderLazy(ChatEntryPage),
+              },
+              {
+                path: 'profile',
+                element: renderLazy(ProfilePage),
+              },
+              {
+                path: 'notifications',
+                element: renderLazy(NotificationSettingsPage),
+              },
+              {
+                path: 'security',
+                element: renderLazy(SecurityPage),
+              },
+              {
+                path: 'bind-info',
+                element: renderLazy(BindInfoPage),
+              },
+              {
+                path: 'donate',
+                element: renderLazy(DonatePage),
+              },
+              {
+                path: 'contact-methods',
+                element: renderLazy(ContactMethodsPage),
+              },
+            ],
           },
         ],
       },
