@@ -21,7 +21,11 @@
 ### 1.4 其他功能
 - 反馈工单提交已接入。
 - 通知偏好设置页与持久化已接入。
+- 站内通知列表、未读计数、已读操作已接入（阶段一）。
+- 通知投递数据模型与调度函数脚本已补齐（阶段一）。
 - 等待页支持按现实时间倒计时到下次揭晓时刻。
+
+通知与匹配模块的对接规范、时序要求、联调 SQL 详见 [SUPABASE_SETUP.md](./SUPABASE_SETUP.md) 第 8 节。
 
 ## 2. 核心未完成项（按优先级）
 
@@ -44,9 +48,6 @@
 - 聊天倒计时需基于真实匹配的 expires_at。
 - 结束匹配按钮未接业务操作。
 
-### P1：通知发送能力未落地
-- 目前仅有通知偏好设置，缺少真正的发送任务（站内/邮件/短信）。
-
 ### P2：数据库初始化步骤分散（已完成）
 - 部分功能依赖增量 SQL，不执行会导致功能页面可见但接口失败。
 
@@ -58,10 +59,11 @@
 2. docs/database-rls.sql
 3. docs/auth-email-domain-constraint.sql
 4. docs/delete-account-function.sql
-5. docs/semi-anonymous-chat-schema.sql
-6. docs/feedback-tickets-schema.sql
+5. docs/notification-delivery-schema.sql
+6. docs/semi-anonymous-chat-schema.sql
+7. docs/feedback-tickets-schema.sql
 
-说明：前四项是基础能力，后两项是匿名聊天与反馈工单的增量能力。
+说明：前四项是基础能力，后三项是通知/匿名聊天/反馈工单的增量能力。
 
 ## 4. 发布前必做检查清单
 
@@ -77,4 +79,10 @@
 ### 4.3 体验收口
 - 移除所有测试入口与演示文案。
 - 替换演示兜底数据为真实空态提示。
+
+### 4.4 通知上线前代办
+- 在 Edge Function Secrets 中配置 APP_BASE_URL，并确认邮件链接不再使用 localhost。
+- 复核 notification-dispatcher 两套文案（pre_reveal、match_result）与产品最终话术一致。
+- 复核结果提醒跳转路径（/chat-entry 或 /match-report）与最终页面一致。
+- 在预发环境完成一次全链路验证：定时触发 -> 写入 notifications -> 邮件送达 -> 前端已读与跳转。
 

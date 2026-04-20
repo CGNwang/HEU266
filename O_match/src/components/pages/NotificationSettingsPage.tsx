@@ -6,22 +6,35 @@ import {
   saveNotificationSettings,
   type NotificationSettings,
 } from '@/services/notificationSettingsService';
+import {
+  loadNotifications,
+  markAllNotificationsRead,
+  markNotificationRead,
+  type NotificationItem,
+} from '@/services/notificationService';
 
 const NotificationSettingsPage: React.FC = () => {
   const navigate = useNavigate();
   const [settings, setSettings] = React.useState<NotificationSettings>(defaultNotificationSettings);
   const [loading, setLoading] = React.useState(true);
   const [saving, setSaving] = React.useState(false);
+  const [markingAll, setMarkingAll] = React.useState(false);
+  const [markingId, setMarkingId] = React.useState<string | null>(null);
   const [hint, setHint] = React.useState('');
   const [error, setError] = React.useState('');
+  const [notifications, setNotifications] = React.useState<NotificationItem[]>([]);
 
   React.useEffect(() => {
     let cancelled = false;
 
     const hydrate = async () => {
-      const next = await loadNotificationSettings();
+      const [next, latestNotifications] = await Promise.all([
+        loadNotificationSettings(),
+        loadNotifications(30),
+      ]);
       if (cancelled) return;
       setSettings(next);
+      setNotifications(latestNotifications);
       setLoading(false);
     };
 
@@ -53,6 +66,31 @@ const NotificationSettingsPage: React.FC = () => {
       ...settings,
       [key]: !settings[key],
     });
+  };
+
+  const refreshNotifications = async () => {
+    const latest = await loadNotifications(30);
+    setNotifications(latest);
+  };
+
+  const handleMarkOneRead = async (id: string) => {
+    setMarkingId(id);
+    const result = await markNotificationRead(id);
+    if (!result.success) {
+      setError(result.message || '操作失败，请稍后重试');
+    }
+    await refreshNotifications();
+    setMarkingId(null);
+  };
+
+  const handleMarkAllRead = async () => {
+    setMarkingAll(true);
+    const result = await markAllNotificationsRead();
+    if (!result.success) {
+      setError(result.message || '操作失败，请稍后重试');
+    }
+    await refreshNotifications();
+    setMarkingAll(false);
   };
 
   if (loading) {
@@ -104,6 +142,62 @@ const NotificationSettingsPage: React.FC = () => {
                 <span className={`h-5 w-5 rounded-full bg-white transition-transform ${settings.matchResultReminder ? 'translate-x-6' : 'translate-x-1'}`} />
               </span>
             </button>
+          </div>
+
+          <div className="mt-12 border-t border-outline-variant/20 pt-8">
+            <div className="flex items-center justify-between mb-4 gap-3">
+              <h2 className="text-lg md:text-xl font-bold text-on-surface">站内通知</h2>
+              <button
+                type="button"
+                onClick={handleMarkAllRead}
+                disabled={markingAll || notifications.length === 0}
+                className="px-4 py-2 rounded-full text-xs font-bold bg-surface-container-low hover:bg-surface-container-lowest disabled:opacity-50"
+              >
+                {markingAll ? '处理中...' : '全部标记已读'}
+              </button>
+            </div>
+
+            {notifications.length === 0 ? (
+              <div className="rounded-2xl bg-surface-container-low p-5 text-sm text-on-surface-variant">
+                目前还没有新的站内通知。
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {notifications.map((item) => (
+                  <div
+                    key={item.id}
+                    className={`rounded-2xl p-4 border transition-colors ${
+                      item.isRead
+                        ? 'bg-surface-container-low border-transparent'
+                        : 'bg-primary-container/20 border-primary/20'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          {!item.isRead && <span className="inline-block w-2 h-2 rounded-full bg-primary" />}
+                          <h3 className="text-sm font-bold text-on-surface truncate">{item.title}</h3>
+                        </div>
+                        <p className="text-sm text-on-surface-variant mt-1 whitespace-pre-wrap">{item.content}</p>
+                        <p className="text-[11px] text-on-surface-variant/70 mt-2">
+                          {new Date(item.createdAt).toLocaleString('zh-CN', { hour12: false })}
+                        </p>
+                      </div>
+                      {!item.isRead && (
+                        <button
+                          type="button"
+                          onClick={() => handleMarkOneRead(item.id)}
+                          disabled={markingId === item.id}
+                          className="shrink-0 px-3 py-1.5 rounded-full text-[11px] font-bold bg-white/70 hover:bg-white disabled:opacity-50"
+                        >
+                          {markingId === item.id ? '处理中...' : '标记已读'}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="mt-12 flex justify-center">
