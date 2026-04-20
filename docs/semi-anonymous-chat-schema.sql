@@ -190,6 +190,15 @@ BEGIN
 
   IF NOT EXISTS (
     SELECT 1 FROM pg_policies
+    WHERE schemaname = 'public' AND tablename = 'chat_blocks' AND policyname = 'chat_blocks_delete_blocker'
+  ) THEN
+    CREATE POLICY chat_blocks_delete_blocker
+      ON chat_blocks FOR DELETE
+      USING (auth.uid() = blocker_id);
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
     WHERE schemaname = 'public' AND tablename = 'chat_messages' AND policyname = 'chat_messages_insert_when_not_blocked'
   ) THEN
     CREATE POLICY chat_messages_insert_when_not_blocked

@@ -4,6 +4,7 @@ import type { ChatContext, ChatMessageItem, RevealStatus } from '@/services/chat
 import {
   acceptReveal,
   blockUser,
+  getBlockStatus,
   getRevealStatus,
   loadMessages,
   rejectReveal,
@@ -13,6 +14,7 @@ import {
   sendContactCard,
   sendMessage,
   subscribeMessages,
+  unblockUser,
 } from '@/services/chatService';
 import { getEnabledContactMethods } from '@/services/contactMethodsService';
 
@@ -39,6 +41,8 @@ const ChatRoomPage: React.FC = () => {
   const [sending, setSending] = useState(false);
   const [error, setError] = useState('');
   const [hint, setHint] = useState('');
+  const [isBlocked, setIsBlocked] = useState(false);
+  const [blocking, setBlocking] = useState(false);
 
   const countdown = useCountdown({ initialSeconds: 72 * 3600 });
 
@@ -69,6 +73,9 @@ const ChatRoomPage: React.FC = () => {
       setMessages(loadedMessages);
       setEnabledContacts(methods.map((item) => ({ platform: item.platform, value: item.value })));
       setRevealStatus(status);
+      const blockState = await getBlockStatus(context.matchId, context.partnerId ?? null);
+      if (!mounted) return;
+      setIsBlocked(blockState.isBlocked);
       setLoading(false);
 
       unsubscribe = await subscribeMessages(context.matchId, (newMessage) => {
@@ -177,20 +184,44 @@ const ChatRoomPage: React.FC = () => {
   const handleBlockPartner = async () => {
     if (!chatContext) return;
 
-    const confirmed = window.confirm('确认要拉黑该用户吗？拉黑后将无法继续互发消息。');
+    const confirmed = window.confirm('确认要拉黑该用户吗？拉黑后将无法继续互发消息，并且之后可以在这里取消拉黑。');
     if (!confirmed) {
       return;
     }
 
     const reason = window.prompt('可填写拉黑原因（可选）') || '';
+    setBlocking(true);
     const result = await blockUser(chatContext.matchId, chatContext.partnerId, reason);
+    setBlocking(false);
 
     if (!result.success) {
       setError(result.error || '拉黑失败');
       return;
     }
 
+    setIsBlocked(true);
     setHint('已拉黑该用户。');
+  };
+
+  const handleUnblockPartner = async () => {
+    if (!chatContext) return;
+
+    const confirmed = window.confirm('确认要取消拉黑吗？取消后可以继续互发消息。');
+    if (!confirmed) {
+      return;
+    }
+
+    setBlocking(true);
+    const result = await unblockUser(chatContext.matchId, chatContext.partnerId);
+    setBlocking(false);
+
+    if (!result.success) {
+      setError(result.error || '取消拉黑失败');
+      return;
+    }
+
+    setIsBlocked(false);
+    setHint('已取消拉黑该用户。');
   };
 
   const handleSendContact = async (platform: string, value: string) => {
@@ -268,12 +299,23 @@ const ChatRoomPage: React.FC = () => {
             >
               举报
             </button>
-            <button
-              onClick={handleBlockPartner}
-              className="px-3 py-1.5 text-xs font-bold text-error hover:opacity-80 transition-opacity rounded-lg bg-error-container/40"
-            >
-              拉黑
-            </button>
+            {isBlocked ? (
+              <button
+                onClick={handleUnblockPartner}
+                disabled={blocking}
+                className="px-3 py-1.5 text-xs font-bold text-primary hover:opacity-80 transition-opacity rounded-lg bg-primary-container/30 disabled:opacity-40"
+              >
+                {blocking ? '处理中...' : '取消拉黑'}
+              </button>
+            ) : (
+              <button
+                onClick={handleBlockPartner}
+                disabled={blocking}
+                className="px-3 py-1.5 text-xs font-bold text-error hover:opacity-80 transition-opacity rounded-lg bg-error-container/40 disabled:opacity-40"
+              >
+                {blocking ? '处理中...' : '拉黑'}
+              </button>
+            )}
             <button className="px-3 py-1.5 text-xs font-bold text-error hover:opacity-80 transition-opacity rounded-lg hover:bg-error-container">结束匹配</button>
           </div>
           <div className="w-full text-xs text-on-surface-variant">{revealStatusText}</div>
@@ -364,7 +406,7 @@ const ChatRoomPage: React.FC = () => {
             />
             <button
               onClick={handleSendMessage}
-              disabled={sending || !chatContext}
+              disabled={sending || !chatContext || isBlocked}
               className="w-12 h-10 rounded-full warm-gradient text-white flex items-center justify-center shadow-md active:scale-95 transition-transform disabled:opacity-40"
             >
               <span className="material-symbols-outlined text-xl">send</span>

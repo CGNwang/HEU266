@@ -2,6 +2,7 @@ import { hasSupabaseConfig, supabase } from '@/lib/supabase';
 
 const LOCAL_CHAT_MESSAGES_KEY = 'stitch_o_match_chat_messages';
 const LOCAL_REVEAL_STATUS_KEY = 'stitch_o_match_reveal_status';
+const LOCAL_BLOCK_STATUS_KEY = 'stitch_o_match_block_status';
 
 export type ChatSender = 'me' | 'partner';
 export type RevealStatus = 'anonymous' | 'requested_by_me' | 'requested_by_partner' | 'revealed' | 'rejected';
@@ -24,6 +25,10 @@ export interface ChatContext {
 export interface ReportPayload {
   reason: string;
   details?: string;
+}
+
+export interface BlockStatus {
+  isBlocked: boolean;
 }
 
 const initialMessages: ChatMessageItem[] = [
@@ -90,6 +95,41 @@ const readLocalRevealStatus = (): RevealStatus => {
 
 const writeLocalRevealStatus = (status: RevealStatus) => {
   localStorage.setItem(LOCAL_REVEAL_STATUS_KEY, status);
+};
+
+const readLocalBlockStatus = (matchId: string): boolean => {
+  const raw = localStorage.getItem(LOCAL_BLOCK_STATUS_KEY);
+  if (!raw) {
+    return false;
+  }
+
+  try {
+    const parsed = JSON.parse(raw) as Record<string, boolean>;
+    return Boolean(parsed[matchId]);
+  } catch {
+    return false;
+  }
+};
+
+const writeLocalBlockStatus = (matchId: string, isBlocked: boolean) => {
+  const raw = localStorage.getItem(LOCAL_BLOCK_STATUS_KEY);
+  let parsed: Record<string, boolean> = {};
+
+  if (raw) {
+    try {
+      parsed = JSON.parse(raw) as Record<string, boolean>;
+    } catch {
+      parsed = {};
+    }
+  }
+
+  if (isBlocked) {
+    parsed[matchId] = true;
+  } else {
+    delete parsed[matchId];
+  }
+
+  localStorage.setItem(LOCAL_BLOCK_STATUS_KEY, JSON.stringify(parsed));
 };
 
 const getCurrentUser = async () => {
@@ -493,5 +533,74 @@ export const blockUser = async (
     return { success: false, error: '拉黑失败，请稍后重试' };
   }
 
+  writeLocalBlockStatus(matchId, true);
+
   return { success: true };
+};
+
+export const unblockUser = async (
+  matchId: string,
+  blockedUserId: string | null
+): Promise<{ success: boolean; error?: string }> => {
+  if (!blockedUserId) {
+    return { success: false, error: '缺少拉黑对象' };
+  }
+
+  if (!hasSupabaseConfig || !supabase) {
+    writeLocalBlockStatus(matchId, false);
+    return { success: true };
+  }
+
+  const user = await getCurrentUser();
+  if (!user) {
+    return { success: false, error: '登录状态失效，请重新登录' };
+  }
+
+  const { error } = await supabase
+    .from('chat_blocks')
+    .delete()
+    .eq('match_id', matchId)
+    .eq('blocker_id', user.id)
+    .eq('blocked_user_id', blockedUserId);
+
+  if (error) {
+    return { success: false, error: '取消拉黑失败，请稍后重试' };
+  }
+
+  writeLocalBlockStatus(matchId, false);
+  return { success: true };
+};
+
+export const getBlockStatus = async (
+  matchId: string,
+  partnerId: string | null
+): Promise<BlockStatus> => {
+  if (!partnerId) {
+    return { isBlocked: false };
+  }
+
+  if (!hasSupabaseConfig || !supabase) {
+    return { isBlocked: readLocalBlockStatus(matchId) };
+  }
+
+  const user = await getCurrentUser();
+  if (!user) {
+    return { isBlocked: readLocalBlockStatus(matchId) };
+  }
+
+  const { data, error } = await supabase
+    .from('chat_blocks')
+    .select('id')
+    .eq('match_id', matchId)
+    .eq('blocker_id', user.id)
+    .eq('blocked_user_id', partnerId)
+    .maybeSingle();
+
+  if (error) {
+    return { isBlocked: readLocalBlockStatus(matchId) };
+  }
+
+  const isBlocked = Boolean(data);
+  writeLocalBlockStatus(matchId, isBlocked);
+  return { isBlocked };
 };
