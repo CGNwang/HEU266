@@ -27,32 +27,14 @@ const mockMatch = {
   remainingTime: 72 * 3600,
 };
 
-const mockMessages = [
-  {
-    id: 'msg_001',
-    senderId: 'partner_001',
-    receiverId: 'user_001',
-    content: '嘿！我发现我们都常去图书馆二楼。你通常是坐在靠窗的那个位置吗？',
-    createdAt: '2024-01-21T10:24:00Z',
-    read: true,
-  },
-  {
-    id: 'msg_002',
-    senderId: 'user_001',
-    receiverId: 'partner_001',
-    content: '被发现了！😅 窗边的位置视野最好，学习累了看窗外特别解压。你现在在那儿吗？',
-    createdAt: '2024-01-21T10:28:00Z',
-    read: true,
-  },
-  {
-    id: 'msg_003',
-    senderId: 'partner_001',
-    receiverId: 'user_001',
-    content: '今天不在呢，不幸被困在一个 3 小时的研讨会里。简直是酷刑。',
-    createdAt: '2024-01-21T10:30:00Z',
-    read: true,
-  },
-];
+const mockMessages: Array<{
+  id: string;
+  senderId: string;
+  receiverId: string;
+  content: string;
+  createdAt: string;
+  read: boolean;
+}> = [];
 
 const mockQuestionnaireModules = [
   {

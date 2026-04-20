@@ -1,22 +1,21 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useCountdown } from '@/hooks';
-import type { ChatContext, ChatMessageItem, RevealStatus } from '@/services/chatService';
+import type { ChatContext, ChatMessageItem } from '@/services/chatService';
 import {
-  acceptReveal,
   blockUser,
   getBlockStatus,
-  getRevealStatus,
   loadMessages,
-  rejectReveal,
   reportUser,
-  requestReveal,
   resolveChatContext,
   sendContactCard,
   sendMessage,
   subscribeMessages,
   unblockUser,
 } from '@/services/chatService';
-import { getEnabledContactMethods } from '@/services/contactMethodsService';
+import { cancelMatching } from '@/services/matchingService';
+import type { ContactMethod } from '@/services/contactMethodsService';
+import { loadContactMethods } from '@/services/contactMethodsService';
 
 const stageLabelMap: Record<string, string> = {
   undergrad_low: '本科低年级',
@@ -31,11 +30,19 @@ const platformLabelMap: Record<string, string> = {
   douyin: '抖音',
 };
 
+const platformIconMap: Record<string, string> = {
+  wechat: 'chat_bubble',
+  qq: 'alternate_email',
+  douyin: 'music_note',
+};
+
+const quickContactPlatforms: ContactMethod['platform'][] = ['wechat', 'qq', 'douyin'];
+
 const ChatRoomPage: React.FC = () => {
+  const navigate = useNavigate();
   const [messages, setMessages] = useState<ChatMessageItem[]>([]);
   const [inputValue, setInputValue] = useState('');
-  const [enabledContacts, setEnabledContacts] = useState<Array<{ platform: string; value: string }>>([]);
-  const [revealStatus, setRevealStatus] = useState<RevealStatus>('anonymous');
+  const [contactMethods, setContactMethods] = useState<ContactMethod[]>([]);
   const [chatContext, setChatContext] = useState<ChatContext | null>(null);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
@@ -46,14 +53,6 @@ const ChatRoomPage: React.FC = () => {
 
   const countdown = useCountdown({ initialSeconds: 72 * 3600 });
 
-  const revealStatusText = useMemo(() => {
-    if (revealStatus === 'revealed') return '已解盲，可交换联系方式';
-    if (revealStatus === 'requested_by_me') return '你已发起解盲申请，等待对方同意';
-    if (revealStatus === 'requested_by_partner') return '对方已发起解盲申请';
-    if (revealStatus === 'rejected') return '上次申请被拒绝，你可以再次发起';
-    return '匿名聊天中';
-  }, [revealStatus]);
-
   useEffect(() => {
     let mounted = true;
     let unsubscribe = () => {};
@@ -61,18 +60,16 @@ const ChatRoomPage: React.FC = () => {
     const run = async () => {
       setLoading(true);
       const context = await resolveChatContext();
-      const [loadedMessages, methods, status] = await Promise.all([
+      const [loadedMessages, methods] = await Promise.all([
         loadMessages(context.matchId),
-        getEnabledContactMethods(),
-        getRevealStatus(context.matchId),
+        loadContactMethods(),
       ]);
 
       if (!mounted) return;
 
       setChatContext(context);
       setMessages(loadedMessages);
-      setEnabledContacts(methods.map((item) => ({ platform: item.platform, value: item.value })));
-      setRevealStatus(status);
+      setContactMethods(methods);
       const blockState = await getBlockStatus(context.matchId, context.partnerId ?? null);
       if (!mounted) return;
       setIsBlocked(blockState.isBlocked);
@@ -112,54 +109,6 @@ const ChatRoomPage: React.FC = () => {
 
     setMessages((prev) => [...prev, result.message as ChatMessageItem]);
     setInputValue('');
-  };
-
-  const handleRequestReveal = async () => {
-    if (!chatContext) return;
-
-    setError('');
-    setHint('');
-
-    const result = await requestReveal(chatContext.matchId, chatContext.partnerId ?? undefined);
-    if (!result.success || !result.status) {
-      setError(result.error || '发起解盲失败');
-      return;
-    }
-
-    setRevealStatus(result.status);
-    setHint('已发起解盲申请，等待对方确认。');
-  };
-
-  const handleAcceptReveal = async () => {
-    if (!chatContext) return;
-
-    setError('');
-    setHint('');
-
-    const result = await acceptReveal(chatContext.matchId);
-    if (!result.success || !result.status) {
-      setError(result.error || '同意解盲失败');
-      return;
-    }
-
-    setRevealStatus(result.status);
-    setHint('双方已解盲，现在可以交换联系方式。');
-  };
-
-  const handleRejectReveal = async () => {
-    if (!chatContext) return;
-
-    setError('');
-    setHint('');
-
-    const result = await rejectReveal(chatContext.matchId);
-    if (!result.success || !result.status) {
-      setError(result.error || '拒绝解盲失败');
-      return;
-    }
-
-    setRevealStatus(result.status);
-    setHint('已拒绝本次解盲申请。');
   };
 
   const handleReportPartner = async () => {
@@ -224,16 +173,31 @@ const ChatRoomPage: React.FC = () => {
     setHint('已取消拉黑该用户。');
   };
 
+  const handleEndMatch = async () => {
+    if (!chatContext) return;
+
+    const confirmed = window.confirm('确认结束这段匹配吗？结束后将返回等待页，并停止当前聊天。');
+    if (!confirmed) {
+      return;
+    }
+
+    setError('');
+    setHint('');
+
+    try {
+      await cancelMatching();
+      setHint('已结束匹配，正在返回等待页。');
+      navigate('/waiting', { replace: true });
+    } catch {
+      setError('结束匹配失败，请稍后重试');
+    }
+  };
+
   const handleSendContact = async (platform: string, value: string) => {
     if (!chatContext) return;
 
     setError('');
     setHint('');
-
-    if (revealStatus !== 'revealed') {
-      setError('请先完成双方解盲，再交换联系方式');
-      return;
-    }
 
     const confirmed = window.confirm(`确认发送${platformLabelMap[platform] || platform}：${value} 吗？`);
     if (!confirmed) {
@@ -250,11 +214,23 @@ const ChatRoomPage: React.FC = () => {
     setHint(`${platformLabelMap[platform] || platform} 已发送`);
   };
 
+  const handleQuickContactAction = async (platform: ContactMethod['platform']) => {
+    const targetMethod = contactMethods.find((item) => item.platform === platform);
+    const canSend = Boolean(targetMethod?.value.trim());
+
+    if (!canSend) {
+      navigate('/contact-methods');
+      return;
+    }
+
+    await handleSendContact(platform, targetMethod?.value || '');
+  };
+
   return (
-    <div className="relative z-10 pt-6 pb-24">
-      {/* Match Info Header */}
-      <div className="mx-auto w-[92%] max-w-7xl mb-6">
-        <div className="glass-card rounded-2xl p-4 flex items-center justify-between gap-4 flex-wrap">
+    <div className="relative z-10 pt-52 md:pt-44 pb-24">
+      {/* Floating Match Actions */}
+      <div className="fixed top-28 left-1/2 -translate-x-1/2 z-40 w-[92%] max-w-7xl pointer-events-none">
+        <div className="rounded-[999px] px-5 py-4 flex items-center justify-between gap-4 flex-wrap shadow-[0_16px_40px_-16px_rgba(148,74,0,0.55)] pointer-events-auto border border-orange-300/70 bg-gradient-to-br from-orange-200/88 via-orange-100/88 to-orange-50/88 backdrop-blur-xl">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-2xl bg-primary-fixed flex items-center justify-center text-2xl shadow border-2 border-white">🍊</div>
             <div>
@@ -265,37 +241,19 @@ const ChatRoomPage: React.FC = () => {
             </div>
           </div>
           <div className="flex items-center gap-4 flex-wrap justify-end">
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-orange-100 rounded-full">
-              <span className="material-symbols-outlined text-orange-600 text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>schedule</span>
-              <span className="text-xs font-bold text-orange-700">{countdown.formatted}</span>
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-orange-50/95 border border-orange-300/60 rounded-full">
+              <span className="material-symbols-outlined text-orange-700 text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>schedule</span>
+              <span className="text-xs font-bold text-orange-800">{countdown.formatted}</span>
             </div>
-            {revealStatus === 'requested_by_partner' ? (
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={handleAcceptReveal}
-                  className="px-3 py-1.5 text-xs font-bold text-white bg-primary rounded-lg hover:opacity-90 transition-opacity"
-                >
-                  同意解盲
-                </button>
-                <button
-                  onClick={handleRejectReveal}
-                  className="px-3 py-1.5 text-xs font-bold text-on-surface bg-surface-container rounded-lg hover:opacity-90 transition-opacity"
-                >
-                  拒绝
-                </button>
-              </div>
-            ) : (
-              <button
-                onClick={handleRequestReveal}
-                disabled={revealStatus === 'requested_by_me' || revealStatus === 'revealed'}
-                className="px-3 py-1.5 text-xs font-bold text-primary hover:opacity-80 transition-opacity rounded-lg bg-primary-container/30 disabled:opacity-40"
-              >
-                {revealStatus === 'revealed' ? '已解盲' : revealStatus === 'requested_by_me' ? '已申请解盲' : '申请解盲'}
-              </button>
-            )}
+            <button
+              onClick={handleEndMatch}
+              className="px-4 py-2 text-xs font-bold text-white rounded-xl bg-red-500 hover:bg-red-600 transition-colors shadow-sm"
+            >
+              结束匹配
+            </button>
             <button
               onClick={handleReportPartner}
-              className="px-3 py-1.5 text-xs font-bold text-on-surface hover:opacity-80 transition-opacity rounded-lg bg-surface-container"
+              className="px-4 py-1.5 text-xs font-bold text-[#A64B00] rounded-full border border-[#F2C28F] bg-[#FFE8CC] hover:bg-[#FFD9B0] transition-colors shadow-sm"
             >
               举报
             </button>
@@ -303,7 +261,7 @@ const ChatRoomPage: React.FC = () => {
               <button
                 onClick={handleUnblockPartner}
                 disabled={blocking}
-                className="px-3 py-1.5 text-xs font-bold text-primary hover:opacity-80 transition-opacity rounded-lg bg-primary-container/30 disabled:opacity-40"
+                className="px-4 py-1.5 text-xs font-bold text-orange-900 rounded-full border border-orange-300/80 bg-orange-100/90 hover:bg-orange-50 transition-colors shadow-sm disabled:opacity-40"
               >
                 {blocking ? '处理中...' : '取消拉黑'}
               </button>
@@ -311,39 +269,17 @@ const ChatRoomPage: React.FC = () => {
               <button
                 onClick={handleBlockPartner}
                 disabled={blocking}
-                className="px-3 py-1.5 text-xs font-bold text-error hover:opacity-80 transition-opacity rounded-lg bg-error-container/40 disabled:opacity-40"
+                className="px-4 py-1.5 text-xs font-bold text-white rounded-full border border-orange-500/70 bg-orange-500 hover:bg-orange-600 transition-colors shadow-sm disabled:opacity-40"
               >
                 {blocking ? '处理中...' : '拉黑'}
               </button>
             )}
-            <button className="px-3 py-1.5 text-xs font-bold text-error hover:opacity-80 transition-opacity rounded-lg hover:bg-error-container">结束匹配</button>
           </div>
-          <div className="w-full text-xs text-on-surface-variant">{revealStatusText}</div>
         </div>
       </div>
 
-      {enabledContacts.length > 0 && (
-        <div className="mx-auto w-[92%] max-w-7xl mb-4">
-          <div className="glass-card rounded-2xl p-4">
-            <div className="text-xs font-bold text-on-surface-variant mb-3">快捷交换联系方式（仅解盲后可用）</div>
-            <div className="flex flex-wrap gap-2">
-              {enabledContacts.map((item) => (
-                <button
-                  key={item.platform}
-                  onClick={() => handleSendContact(item.platform, item.value)}
-                  disabled={revealStatus !== 'revealed'}
-                  className="px-3 py-2 rounded-full bg-surface-container-low hover:bg-surface-container-lowest text-xs font-bold text-on-surface disabled:opacity-40"
-                >
-                  发送{platformLabelMap[item.platform] || item.platform}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Chat Messages Area */}
-      <div className="mx-auto w-[92%] max-w-7xl space-y-6 pb-8">
+      <div className="mx-auto w-[92%] max-w-7xl space-y-6 pb-40 md:pb-44">
         <div className="flex justify-center">
           <div className="bg-white/50 backdrop-blur-md border border-white/40 px-6 py-2.5 rounded-full text-[10px] font-black text-on-surface-variant/40 tracking-[0.2em] shadow-sm uppercase">
             缘分始于 2 天前
@@ -382,6 +318,46 @@ const ChatRoomPage: React.FC = () => {
 
         {error && <div className="text-red-500 text-sm text-center">{error}</div>}
         {hint && <div className="text-green-600 text-sm text-center">{hint}</div>}
+      </div>
+
+      <div className="fixed bottom-[88px] md:bottom-[96px] left-0 right-0 z-[45] px-4 md:px-0">
+        <div className="mx-auto w-[92%] max-w-7xl">
+          <div className="glass-card rounded-[999px] px-4 py-3 md:px-5 md:py-4 shadow-md border-white/60">
+            <div className="flex flex-wrap gap-2">
+              {quickContactPlatforms.map((platform) => {
+                const targetMethod = contactMethods.find((item) => item.platform === platform);
+                const canSend = Boolean(targetMethod?.value.trim());
+
+                return (
+                  <button
+                    key={platform}
+                    onClick={() => {
+                      void handleQuickContactAction(platform);
+                    }}
+                    className={`px-3 py-2 rounded-full text-xs font-bold transition-colors ${
+                      !canSend
+                        ? 'text-[#A64B00] bg-[#FFE8CC] border border-[#F2C28F] hover:bg-[#FFD9B0]'
+                        : platform === 'wechat'
+                          ? 'text-white bg-[#07C160] hover:bg-[#06AD56]'
+                          : platform === 'qq'
+                            ? 'text-white bg-[#2A8CFF] hover:bg-[#1E73E8]'
+                            : 'text-white bg-[#121212] hover:bg-[#000000]'
+                    }`}
+                  >
+                    <span className="flex items-center gap-1">
+                      {platformIconMap[platform] && (
+                        <span className="material-symbols-outlined text-[14px] leading-none">
+                          {platformIconMap[platform]}
+                        </span>
+                      )}
+                      <span>{canSend ? `发送${platformLabelMap[platform] || platform}` : `设置${platformLabelMap[platform] || platform}`}</span>
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Floating Input Area */}

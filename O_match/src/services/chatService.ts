@@ -31,22 +31,7 @@ export interface BlockStatus {
   isBlocked: boolean;
 }
 
-const initialMessages: ChatMessageItem[] = [
-  {
-    id: 'seed_1',
-    sender: 'partner',
-    content: '嘿！我发现我们都常去图书馆二楼。你通常坐靠窗位置吗？',
-    time: '10:24',
-    type: 'text',
-  },
-  {
-    id: 'seed_2',
-    sender: 'me',
-    content: '被你发现了。窗边确实很舒服。',
-    time: '10:28',
-    type: 'text',
-  },
-];
+const initialMessages: ChatMessageItem[] = [];
 
 const toClock = (dateInput?: string) => {
   const d = dateInput ? new Date(dateInput) : new Date();
@@ -271,6 +256,29 @@ export const sendMessage = async (
     .single();
 
   if (error || !data) {
+    const { data: blockRows, error: blockCheckError } = await supabase
+      .from('chat_blocks')
+      .select('blocker_id, blocked_user_id')
+      .eq('match_id', matchId)
+      .or(`blocker_id.eq.${user.id},blocked_user_id.eq.${user.id}`)
+      .limit(5);
+
+    if (!blockCheckError && blockRows && blockRows.length > 0) {
+      const blockedByPartner = blockRows.some(
+        (item) => item.blocked_user_id === user.id && item.blocker_id !== user.id
+      );
+      if (blockedByPartner) {
+        return { success: false, error: '对方已将你拉黑，暂时无法发送消息。' };
+      }
+
+      const blockedByMe = blockRows.some(
+        (item) => item.blocker_id === user.id && item.blocked_user_id !== user.id
+      );
+      if (blockedByMe) {
+        return { success: false, error: '你已拉黑对方，请先取消拉黑再发送消息。' };
+      }
+    }
+
     return { success: false, error: '发送失败，请稍后重试' };
   }
 

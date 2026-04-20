@@ -54,10 +54,6 @@ const ContactMethodsPage: React.FC = () => {
     setMethods((prev) => prev.map((item) => (item.platform === platform ? { ...item, value } : item)));
   };
 
-  const handleToggle = (platform: ContactPlatform, enabled: boolean) => {
-    setMethods((prev) => prev.map((item) => (item.platform === platform ? { ...item, enabled } : item)));
-  };
-
   const handleSave = async () => {
     setError('');
     setHint('');
@@ -76,14 +72,13 @@ const ContactMethodsPage: React.FC = () => {
       return;
     }
 
-    setHint('联系方式已保存。解盲成功后，你可以在聊天页快捷发送。');
+    setHint('联系方式已保存。');
   };
 
   return (
     <main className="pt-12 pb-44 px-4 md:px-8 max-w-4xl mx-auto">
       <div className="mb-8">
         <h1 className="font-headline text-3xl md:text-4xl font-extrabold tracking-tight text-on-surface mb-2">联系方式管理</h1>
-        <p className="text-on-surface-variant font-medium">仅在双方解盲后，聊天页才会开放快捷发送联系方式</p>
       </div>
 
       <div className="glass-card ghost-border rounded-[2rem] p-6 md:p-8 shadow-[0_8px_32px_rgba(28,28,24,0.06)] space-y-5">
@@ -91,20 +86,9 @@ const ContactMethodsPage: React.FC = () => {
 
         {!loading && methods.map((item) => (
           <div key={item.platform} className="bg-surface-container-low rounded-2xl p-4 md:p-5">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2 text-on-surface font-bold">
-                <span className="material-symbols-outlined text-primary">{platformIcon[item.platform]}</span>
-                <span>{platformLabel[item.platform]}</span>
-              </div>
-              <label className="inline-flex items-center gap-2 text-xs text-on-surface-variant">
-                <input
-                  type="checkbox"
-                  checked={item.enabled}
-                  onChange={(e) => handleToggle(item.platform, e.target.checked)}
-                  className="accent-primary"
-                />
-                允许快捷发送
-              </label>
+            <div className="flex items-center gap-2 text-on-surface font-bold mb-3">
+              <span className="material-symbols-outlined text-primary">{platformIcon[item.platform]}</span>
+              <span>{platformLabel[item.platform]}</span>
             </div>
             <input
               value={item.value}
