@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { chatApi } from '@/api';
+import { hasSupabaseConfig } from '@/lib/supabase';
 import { useCountdown } from '@/hooks';
 import type { ChatContext, ChatMessageItem } from '@/services/chatService';
 import {
@@ -162,22 +163,56 @@ const ChatRoomPage: React.FC = () => {
   const handleSendMessage = async () => {
     if (!inputValue.trim() || !chatContext) return;
 
+    const messageText = inputValue.trim();
+    const isOptimisticMode = hasSupabaseConfig;
+    const optimisticId = `optimistic_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+
     setSending(true);
     setError('');
 
-    const result = await sendMessage(chatContext.matchId, inputValue);
+    if (isOptimisticMode) {
+      const optimisticMessage: ChatMessageItem = {
+        id: optimisticId,
+        sender: 'me',
+        content: messageText,
+        time: new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false }),
+        type: 'text',
+      };
+
+      setMessages((prev) => [...prev, optimisticMessage]);
+      setInputValue('');
+    }
+
+    const result = await sendMessage(chatContext.matchId, messageText);
+
     setSending(false);
 
     if (!result.success || !result.message) {
+      if (isOptimisticMode) {
+        setMessages((prev) => prev.filter((item) => item.id !== optimisticId));
+        setInputValue(messageText);
+      }
       setError(result.error || '发送失败，请稍后重试');
       return;
+    }
+
+    if (isOptimisticMode) {
+      const remoteMessage = result.message as ChatMessageItem;
+      setMessages((prev) => {
+        const remoteAlreadyExists = prev.some((item) => item.id === remoteMessage.id && item.id !== optimisticId);
+        if (remoteAlreadyExists) {
+          return prev.filter((item) => item.id !== optimisticId);
+        }
+
+        return prev.map((item) => (item.id === optimisticId ? remoteMessage : item));
+      });
     }
 
     if (chatContext.partnerId) {
       void addLocalNotificationForUser(chatContext.partnerId, {
         kind: 'chat_message',
         title: '新消息',
-        content: inputValue.trim().slice(0, 32),
+        content: messageText.slice(0, 32),
         linkPath: '/chat-entry',
         channel: 'in_app',
         isRead: false,
@@ -185,8 +220,10 @@ const ChatRoomPage: React.FC = () => {
       });
     }
 
-    setMessages((prev) => [...prev, result.message as ChatMessageItem]);
-    setInputValue('');
+    if (!isOptimisticMode) {
+      setMessages((prev) => [...prev, result.message as ChatMessageItem]);
+      setInputValue('');
+    }
   };
 
   const handleReportPartner = async () => {
