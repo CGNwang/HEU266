@@ -1,5 +1,7 @@
 import { http, HttpResponse, delay } from 'msw';
 
+const LOCAL_CHAT_UNREAD_COUNT_KEY = 'stitch_o_match_chat_unread_count';
+
 // 模拟用户数据
 const mockUser = {
   id: 'user_001',
@@ -35,6 +37,21 @@ const mockMessages: Array<{
   createdAt: string;
   read: boolean;
 }> = [];
+
+const readUnreadCount = () => {
+  const raw = localStorage.getItem(LOCAL_CHAT_UNREAD_COUNT_KEY);
+  if (raw === null) {
+    localStorage.setItem(LOCAL_CHAT_UNREAD_COUNT_KEY, '2');
+    return 2;
+  }
+
+  const parsed = Number(raw);
+  return Number.isFinite(parsed) ? parsed : 0;
+};
+
+const writeUnreadCount = (count: number) => {
+  localStorage.setItem(LOCAL_CHAT_UNREAD_COUNT_KEY, String(Math.max(0, count)));
+};
 
 const mockQuestionnaireModules = [
   {
@@ -293,8 +310,18 @@ export const handlers = [
       code: 200,
       message: '获取成功',
       data: {
-        count: 2,
+        count: readUnreadCount(),
       },
+    });
+  }),
+
+  // POST /api/chat/read/:matchId
+  http.post('/api/chat/read/:matchId', async () => {
+    writeUnreadCount(0);
+    return HttpResponse.json({
+      code: 200,
+      message: '已读成功',
+      data: null,
     });
   }),
 ];

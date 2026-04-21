@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { resolveChatContext } from '@/services/chatService';
+import { getBlockStatus, loadMessages, resolveChatContext } from '@/services/chatService';
+import { loadContactMethods } from '@/services/contactMethodsService';
 import { hasSubmittedQuestionnaire } from '@/services/questionnaireService';
 
 const MATCH_WEEKDAY = 3; // 周三
@@ -36,6 +37,7 @@ const formatRemaining = (milliseconds: number) => {
 const ChatEntryPage: React.FC = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const [entryProgress, setEntryProgress] = useState(10);
   const [needsQuestionnaire, setNeedsQuestionnaire] = useState(false);
   const [nextMatchTime, setNextMatchTime] = useState<Date>(() => getNextMatchTime());
   const [countdownText, setCountdownText] = useState('');
@@ -56,6 +58,28 @@ const ChatEntryPage: React.FC = () => {
       window.clearInterval(timer);
     };
   }, []);
+
+  useEffect(() => {
+    if (!loading) {
+      setEntryProgress(100);
+      return;
+    }
+
+    let progress = 10;
+    setEntryProgress(progress);
+
+    // Fast start + slow finish gives users a sense of momentum without fake instant completion.
+    const timer = window.setInterval(() => {
+      const target = 93;
+      const step = Math.max(0.7, (target - progress) * 0.08);
+      progress = Math.min(target, progress + step);
+      setEntryProgress(progress);
+    }, 120);
+
+    return () => {
+      window.clearInterval(timer);
+    };
+  }, [loading]);
 
   useEffect(() => {
     let mounted = true;
@@ -87,7 +111,38 @@ const ChatEntryPage: React.FC = () => {
       }
 
       if (context.partnerId) {
-        navigate('/chat', { replace: true });
+        const [messages, contactMethods, blockStatus] = await Promise.all([
+          loadMessages(context.matchId),
+          loadContactMethods(),
+          getBlockStatus(context.matchId, context.partnerId ?? null),
+        ]);
+
+        if (!mounted) {
+          return;
+        }
+
+        setEntryProgress(100);
+
+        // Give the browser one short frame window to paint the completed bar.
+        await new Promise<void>((resolve) => {
+          window.setTimeout(() => resolve(), 120);
+        });
+
+        if (!mounted) {
+          return;
+        }
+
+        navigate('/chat', {
+          replace: true,
+          state: {
+            chatContext: context,
+            chatPreload: {
+              messages,
+              contactMethods,
+              isBlocked: blockStatus.isBlocked,
+            },
+          },
+        });
         return;
       }
 
@@ -102,10 +157,31 @@ const ChatEntryPage: React.FC = () => {
   }, [navigate, forceNoMatchDemo]);
 
   if (loading) {
+    const currentProgress = Math.min(100, Math.round(entryProgress));
+    const stageText = currentProgress < 40
+      ? '正在连接你的聊天空间'
+      : currentProgress < 80
+        ? '正在同步最近聊天记录'
+        : '即将进入聊天';
+
     return (
       <main className="pt-24 pb-32 px-4 md:px-8 max-w-4xl mx-auto">
-        <div className="glass-card ghost-border rounded-[2rem] p-8 md:p-12 text-center">
-          <div className="text-on-surface-variant">正在轻轻寻找你的缘分...</div>
+        <div className="glass-card ghost-border rounded-[2rem] p-8 md:p-12 text-center space-y-5">
+          <div className="text-sm md:text-base font-semibold text-on-surface">{stageText}</div>
+
+          <div className="mx-auto w-full max-w-md">
+            <div className="relative h-2.5 rounded-full bg-orange-100/90 overflow-hidden" aria-label="加载进度">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-orange-400 via-orange-500 to-amber-500 transition-[width] duration-200 ease-out"
+                style={{ width: `${currentProgress}%` }}
+              />
+              <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(110deg,transparent_0%,rgba(255,255,255,0.48)_45%,transparent_70%)] animate-pulse" />
+            </div>
+          </div>
+
+          <div className="text-xs text-on-surface-variant">
+            {currentProgress}%
+          </div>
         </div>
       </main>
     );

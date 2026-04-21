@@ -1,8 +1,10 @@
 import { hasSupabaseConfig, supabase } from '@/lib/supabase';
+import { getCurrentUser as getAuthCurrentUser } from '@/services/authService';
 
 const LOCAL_NOTIFICATIONS_KEY = 'stitch_o_match_notifications';
+const LOCAL_NOTIFICATION_EVENT = 'notification-updated';
 
-export type NotificationKind = 'pre_reveal' | 'match_result' | 'system';
+export type NotificationKind = 'pre_reveal' | 'match_result' | 'system' | 'chat_message';
 export type NotificationChannel = 'in_app' | 'email';
 
 export interface NotificationItem {
@@ -37,6 +39,10 @@ const readLocalNotifications = (): LocalNotificationItem[] => {
 
 const writeLocalNotifications = (items: LocalNotificationItem[]) => {
   localStorage.setItem(LOCAL_NOTIFICATIONS_KEY, JSON.stringify(items));
+};
+
+const dispatchLocalNotificationUpdate = () => {
+  window.dispatchEvent(new Event(LOCAL_NOTIFICATION_EVENT));
 };
 
 const normalizeItem = (item: Partial<NotificationItem>): NotificationItem => {
@@ -81,6 +87,11 @@ const mapRemoteItem = (row: {
 };
 
 const getCurrentUserId = async (): Promise<string | null> => {
+  const currentUser = await getAuthCurrentUser();
+  if (currentUser?.id) {
+    return currentUser.id;
+  }
+
   if (!hasSupabaseConfig || !supabase) {
     return null;
   }
@@ -93,45 +104,66 @@ const getCurrentUserId = async (): Promise<string | null> => {
   return data.user.id;
 };
 
+export const addLocalNotificationForUser = async (
+  userId: string,
+  notification: Partial<NotificationItem>
+): Promise<void> => {
+  const nextItem = {
+    ...normalizeItem(notification),
+    userId,
+  } as LocalNotificationItem;
+
+  const current = readLocalNotifications();
+  current.push(nextItem);
+  writeLocalNotifications(current);
+  dispatchLocalNotificationUpdate();
+};
+
 export const loadNotifications = async (limit = 20): Promise<NotificationItem[]> => {
-  const local = readLocalNotifications().map((item) => normalizeItem(item));
+  const local = readLocalNotifications();
+
+  const currentUserId = await getCurrentUserId();
+  const localForCurrentUser = currentUserId
+    ? local.filter((item) => item.userId === currentUserId || !item.userId)
+    : local;
 
   if (!hasSupabaseConfig || !supabase) {
-    return local.slice(0, limit);
+    return localForCurrentUser.map(normalizeItem).slice(0, limit);
   }
 
-  const userId = await getCurrentUserId();
-  if (!userId) {
-    return local.slice(0, limit);
+  if (!currentUserId) {
+    return localForCurrentUser.map(normalizeItem).slice(0, limit);
   }
 
   const { data, error } = await supabase
     .from('notifications')
     .select('id, kind, title, content, link_path, channel, is_read, scheduled_for, delivered_at, created_at')
-    .eq('user_id', userId)
+    .eq('user_id', currentUserId)
     .eq('channel', 'in_app')
     .order('created_at', { ascending: false })
     .limit(limit);
 
   if (error || !data) {
-    return local.slice(0, limit);
+    return localForCurrentUser.map(normalizeItem).slice(0, limit);
   }
 
   const remote = data.map(mapRemoteItem);
-  writeLocalNotifications(remote);
-  return remote;
+  return [...localForCurrentUser.map(normalizeItem), ...remote].slice(0, limit);
 };
 
 export const getUnreadNotificationCount = async (): Promise<number> => {
   const local = readLocalNotifications();
+  const userId = await getCurrentUserId();
+  const localUnread = userId
+    ? local.filter((item) => (item.userId === userId || !item.userId) && !item.isRead).length
+    : local.filter((item) => !item.isRead).length;
 
   if (!hasSupabaseConfig || !supabase) {
-    return local.filter((item) => !item.isRead).length;
+    return localUnread;
   }
 
-  const userId = await getCurrentUserId();
   if (!userId) {
-    return local.filter((item) => !item.isRead).length;
+    return localUnread;
   }
 
   const { count, error } = await supabase
@@ -142,10 +174,34 @@ export const getUnreadNotificationCount = async (): Promise<number> => {
     .eq('is_read', false);
 
   if (error) {
-    return local.filter((item) => !item.isRead).length;
+    return localUnread;
   }
 
-  return count ?? 0;
+  return (count ?? 0) + localUnread;
+};
+
+export const markLocalNotificationsReadForCurrentUserByKind = async (
+  kind: NotificationKind
+): Promise<void> => {
+  const userId = await getCurrentUserId();
+  if (!userId) {
+    return;
+  }
+
+  const current = readLocalNotifications();
+  const next = current.map((item) => {
+    if (item.userId !== userId || item.kind !== kind) {
+      return item;
+    }
+
+    return {
+      ...item,
+      isRead: true,
+    };
+  });
+
+  writeLocalNotifications(next);
+  dispatchLocalNotificationUpdate();
 };
 
 export const markNotificationRead = async (
@@ -163,6 +219,7 @@ export const markNotificationRead = async (
     };
   });
   writeLocalNotifications(nextLocal);
+  dispatchLocalNotificationUpdate();
 
   if (!hasSupabaseConfig || !supabase) {
     return { success: true };
@@ -191,6 +248,7 @@ export const markAllNotificationsRead = async (): Promise<{ success: boolean; me
   const now = new Date().toISOString();
   const local = readLocalNotifications();
   writeLocalNotifications(local.map((item) => ({ ...item, isRead: true, deliveredAt: item.deliveredAt || now })));
+  dispatchLocalNotificationUpdate();
 
   if (!hasSupabaseConfig || !supabase) {
     return { success: true };

@@ -36,9 +36,16 @@ export const Header: React.FC<HeaderProps> = ({ className }) => {
       void refresh();
     }, 30000);
 
+    const handleUnreadUpdate = () => {
+      void refresh();
+    };
+
+    window.addEventListener('notification-updated', handleUnreadUpdate);
+
     return () => {
       cancelled = true;
       window.clearInterval(timer);
+      window.removeEventListener('notification-updated', handleUnreadUpdate);
     };
   }, [isAuthenticated]);
 

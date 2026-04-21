@@ -1,4 +1,5 @@
 import { hasSupabaseConfig, supabase } from '@/lib/supabase';
+import { getCurrentUser } from '@/services/authService';
 
 const LOCAL_CONTACT_METHODS_KEY = 'stitch_o_match_contact_methods';
 
@@ -57,12 +58,8 @@ const writeLocalMethods = (methods: ContactMethod[]) => {
 const getAuthedUserId = async (): Promise<string | null> => {
   if (!hasSupabaseConfig || !supabase) return null;
 
-  const { data, error } = await supabase.auth.getUser();
-  if (error || !data.user) {
-    return null;
-  }
-
-  return data.user.id;
+  const user = await getCurrentUser();
+  return user?.id ?? null;
 };
 
 export const loadContactMethods = async (): Promise<ContactMethod[]> => {

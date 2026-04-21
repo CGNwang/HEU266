@@ -1,8 +1,15 @@
 import { hasSupabaseConfig, supabase } from '@/lib/supabase';
+import { getCurrentUser as getAuthCurrentUser } from '@/services/authService';
+import { addLocalNotificationForUser } from '@/services/notificationService';
 
 const LOCAL_CHAT_MESSAGES_KEY = 'stitch_o_match_chat_messages';
 const LOCAL_REVEAL_STATUS_KEY = 'stitch_o_match_reveal_status';
 const LOCAL_BLOCK_STATUS_KEY = 'stitch_o_match_block_status';
+const LOCAL_CHAT_UNREAD_COUNT_KEY = 'stitch_o_match_chat_unread_count';
+const LOCAL_ACTIVE_CHAT_MATCH_KEY = 'stitch_o_match_active_chat_match';
+const CHAT_CONTEXT_CACHE_TTL_MS = 10000;
+const LOCAL_CHAT_MESSAGE_EVENT = 'chat-local-message';
+const LOCAL_CHAT_REACTION_EVENT = 'chat-local-reaction';
 
 export type ChatSender = 'me' | 'partner';
 export type RevealStatus = 'anonymous' | 'requested_by_me' | 'requested_by_partner' | 'revealed' | 'rejected';
@@ -32,6 +39,11 @@ export interface BlockStatus {
 }
 
 const initialMessages: ChatMessageItem[] = [];
+let chatContextCache: {
+  userId: string;
+  context: ChatContext;
+  expiresAt: number;
+} | null = null;
 
 const toClock = (dateInput?: string) => {
   const d = dateInput ? new Date(dateInput) : new Date();
@@ -62,6 +74,70 @@ const readLocalMessages = (): ChatMessageItem[] => {
 
 const writeLocalMessages = (messages: ChatMessageItem[]) => {
   localStorage.setItem(LOCAL_CHAT_MESSAGES_KEY, JSON.stringify(messages));
+};
+
+const dispatchLocalMessageEvent = (message: ChatMessageItem, options?: { incrementUnread?: boolean }) => {
+  window.dispatchEvent(new CustomEvent<{
+    message: ChatMessageItem;
+    incrementUnread?: boolean;
+  }>(LOCAL_CHAT_MESSAGE_EVENT, {
+    detail: {
+      message,
+      incrementUnread: options?.incrementUnread,
+    },
+  }));
+};
+
+const appendLocalMessage = (message: ChatMessageItem, options?: { incrementUnread?: boolean }) => {
+  const current = readLocalMessages();
+  const next = [...current, message];
+  writeLocalMessages(next);
+  dispatchLocalMessageEvent(message, options);
+};
+
+const scheduleLocalPartnerReply = (matchId: string, sentContent: string) => {
+  const replyTemplates = [
+    '收到，我再看看',
+    '这个很有意思',
+    '哈哈，赞同',
+    '我也是这么想的',
+    '我们很合拍呀',
+  ];
+  const delayMs = 1400 + Math.floor(Math.random() * 1800);
+
+  window.setTimeout(() => {
+    const reply: ChatMessageItem = {
+      id: `local_reply_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+      sender: 'partner',
+      content: replyTemplates[Math.floor(Math.random() * replyTemplates.length)],
+      time: toClock(),
+      type: inferType(sentContent.startsWith('[联系方式]') ? '[系统] 好的，我记下了' : 'text'),
+    };
+
+    appendLocalMessage(reply);
+
+    if (getActiveLocalChatMatchId() !== matchId) {
+      incrementLocalChatUnreadCount();
+    }
+
+    void getCurrentUser().then((currentUser) => {
+      if (!currentUser?.id) {
+        return;
+      }
+
+      void addLocalNotificationForUser(currentUser.id, {
+        kind: 'chat_message',
+        title: '新消息',
+        content: reply.content.slice(0, 32),
+        linkPath: '/chat-entry',
+        channel: 'in_app',
+        isRead: false,
+        createdAt: new Date().toISOString(),
+      });
+    });
+
+    window.dispatchEvent(new CustomEvent(LOCAL_CHAT_REACTION_EVENT, { detail: { matchId, reply } }));
+  }, delayMs);
 };
 
 const readLocalRevealStatus = (): RevealStatus => {
@@ -117,12 +193,52 @@ const writeLocalBlockStatus = (matchId: string, isBlocked: boolean) => {
   localStorage.setItem(LOCAL_BLOCK_STATUS_KEY, JSON.stringify(parsed));
 };
 
-const getCurrentUser = async () => {
-  if (!hasSupabaseConfig || !supabase) return null;
+const readLocalUnreadCount = (): number => {
+  const raw = localStorage.getItem(LOCAL_CHAT_UNREAD_COUNT_KEY);
+  if (raw === null) {
+    return 0;
+  }
 
-  const { data, error } = await supabase.auth.getUser();
-  if (error || !data.user) return null;
-  return data.user;
+  const parsed = Number(raw);
+  return Number.isFinite(parsed) ? parsed : 0;
+};
+
+const writeLocalUnreadCount = (count: number) => {
+  localStorage.setItem(LOCAL_CHAT_UNREAD_COUNT_KEY, String(Math.max(0, count)));
+  window.dispatchEvent(new Event('chat-unread-updated'));
+};
+
+const getActiveLocalChatMatchId = (): string | null => {
+  const raw = localStorage.getItem(LOCAL_ACTIVE_CHAT_MATCH_KEY);
+  return raw && raw.trim() ? raw : null;
+};
+
+export const setActiveLocalChatMatchId = (matchId: string | null): void => {
+  if (matchId) {
+    localStorage.setItem(LOCAL_ACTIVE_CHAT_MATCH_KEY, matchId);
+  } else {
+    localStorage.removeItem(LOCAL_ACTIVE_CHAT_MATCH_KEY);
+  }
+};
+
+export const getLocalChatUnreadCount = (): number => {
+  return readLocalUnreadCount();
+};
+
+export const setLocalChatUnreadCount = (count: number): void => {
+  writeLocalUnreadCount(count);
+};
+
+export const incrementLocalChatUnreadCount = (delta = 1): void => {
+  writeLocalUnreadCount(readLocalUnreadCount() + delta);
+};
+
+export const clearLocalChatUnreadCount = (): void => {
+  writeLocalUnreadCount(0);
+};
+
+const getCurrentUser = async () => {
+  return getAuthCurrentUser();
 };
 
 export const resolveChatContext = async (): Promise<ChatContext> => {
@@ -143,6 +259,14 @@ export const resolveChatContext = async (): Promise<ChatContext> => {
       partnerStage: null,
       isDemo: true,
     };
+  }
+
+  if (
+    chatContextCache &&
+    chatContextCache.userId === user.id &&
+    chatContextCache.expiresAt > Date.now()
+  ) {
+    return chatContextCache.context;
   }
 
   const { data: matchData, error: matchError } = await supabase
@@ -176,12 +300,20 @@ export const resolveChatContext = async (): Promise<ChatContext> => {
     partnerStage = (profileData?.stage as string | null | undefined) ?? null;
   }
 
-  return {
+  const context = {
     matchId: matchData.id,
     partnerId: partnerId ?? null,
     partnerStage,
     isDemo: false,
   };
+
+  chatContextCache = {
+    userId: user.id,
+    context,
+    expiresAt: Date.now() + CHAT_CONTEXT_CACHE_TTL_MS,
+  };
+
+  return context;
 };
 
 export const loadMessages = async (matchId: string): Promise<ChatMessageItem[]> => {
@@ -234,9 +366,8 @@ export const sendMessage = async (
   };
 
   if (!hasSupabaseConfig || !supabase) {
-    const current = readLocalMessages();
-    const next = [...current, localMessage];
-    writeLocalMessages(next);
+    appendLocalMessage(localMessage);
+    scheduleLocalPartnerReply(matchId, clean);
     return { success: true, message: localMessage };
   }
 
@@ -306,7 +437,24 @@ export const subscribeMessages = async (
   onMessage: (message: ChatMessageItem) => void
 ): Promise<() => void> => {
   if (!hasSupabaseConfig || !supabase) {
-    return () => {};
+    const handleLocalMessage = (event: Event) => {
+      const customEvent = event as CustomEvent<{
+        message: ChatMessageItem;
+      }>;
+
+      const message = customEvent.detail?.message;
+      if (!message) {
+        return;
+      }
+
+      onMessage(message);
+    };
+
+    window.addEventListener(LOCAL_CHAT_MESSAGE_EVENT, handleLocalMessage);
+
+    return () => {
+      window.removeEventListener(LOCAL_CHAT_MESSAGE_EVENT, handleLocalMessage);
+    };
   }
 
   const client = supabase;
@@ -339,6 +487,10 @@ export const subscribeMessages = async (
           time: toClock(row.created_at),
           type: inferType(row.content),
         });
+
+        if (row.sender_id !== currentUserId) {
+          incrementLocalChatUnreadCount();
+        }
       }
     )
     .subscribe();

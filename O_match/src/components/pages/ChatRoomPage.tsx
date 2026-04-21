@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useRef, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { chatApi } from '@/api';
 import { useCountdown } from '@/hooks';
 import type { ChatContext, ChatMessageItem } from '@/services/chatService';
 import {
@@ -11,11 +12,16 @@ import {
   sendContactCard,
   sendMessage,
   subscribeMessages,
+  setActiveLocalChatMatchId,
   unblockUser,
 } from '@/services/chatService';
 import { cancelMatching } from '@/services/matchingService';
 import type { ContactMethod } from '@/services/contactMethodsService';
 import { loadContactMethods } from '@/services/contactMethodsService';
+import {
+  addLocalNotificationForUser,
+  markLocalNotificationsReadForCurrentUserByKind,
+} from '@/services/notificationService';
 
 const stageLabelMap: Record<string, string> = {
   undergrad_low: '本科低年级',
@@ -38,18 +44,32 @@ const platformIconMap: Record<string, string> = {
 
 const quickContactPlatforms: ContactMethod['platform'][] = ['wechat', 'qq', 'douyin'];
 
+interface ChatRouteState {
+  chatContext?: ChatContext;
+  chatPreload?: {
+    messages: ChatMessageItem[];
+    contactMethods: ContactMethod[];
+    isBlocked: boolean;
+  };
+}
+
 const ChatRoomPage: React.FC = () => {
   const navigate = useNavigate();
-  const [messages, setMessages] = useState<ChatMessageItem[]>([]);
+  const location = useLocation();
+  const routeState = (location.state as ChatRouteState | null) ?? null;
+  const preloadedContext = routeState?.chatContext ?? null;
+  const preloadedData = routeState?.chatPreload ?? null;
+  const [messages, setMessages] = useState<ChatMessageItem[]>(preloadedData?.messages ?? []);
   const [inputValue, setInputValue] = useState('');
-  const [contactMethods, setContactMethods] = useState<ContactMethod[]>([]);
-  const [chatContext, setChatContext] = useState<ChatContext | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [contactMethods, setContactMethods] = useState<ContactMethod[]>(preloadedData?.contactMethods ?? []);
+  const [chatContext, setChatContext] = useState<ChatContext | null>(preloadedContext);
+  const [loading, setLoading] = useState(!preloadedData);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState('');
   const [hint, setHint] = useState('');
-  const [isBlocked, setIsBlocked] = useState(false);
+  const [isBlocked, setIsBlocked] = useState(preloadedData?.isBlocked ?? false);
   const [blocking, setBlocking] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   const countdown = useCountdown({ initialSeconds: 72 * 3600 });
 
@@ -58,40 +78,86 @@ const ChatRoomPage: React.FC = () => {
     let unsubscribe = () => {};
 
     const run = async () => {
-      setLoading(true);
-      const context = await resolveChatContext();
-      const [loadedMessages, methods] = await Promise.all([
-        loadMessages(context.matchId),
-        loadContactMethods(),
-      ]);
+      try {
+        setLoading(true);
+        setError('');
 
-      if (!mounted) return;
+        const context = preloadedContext ?? await resolveChatContext();
+        if (!mounted) return;
 
-      setChatContext(context);
-      setMessages(loadedMessages);
-      setContactMethods(methods);
-      const blockState = await getBlockStatus(context.matchId, context.partnerId ?? null);
-      if (!mounted) return;
-      setIsBlocked(blockState.isBlocked);
-      setLoading(false);
+        setChatContext(context);
 
-      unsubscribe = await subscribeMessages(context.matchId, (newMessage) => {
-        setMessages((prev) => {
-          if (prev.some((item) => item.id === newMessage.id)) {
-            return prev;
-          }
-          return [...prev, newMessage];
+        if (preloadedData) {
+          setMessages(preloadedData.messages);
+          setContactMethods(preloadedData.contactMethods);
+          setIsBlocked(preloadedData.isBlocked);
+        } else {
+          const [loadedMessages, methods] = await Promise.all([
+            loadMessages(context.matchId),
+            loadContactMethods(),
+          ]);
+          if (!mounted) return;
+
+          setMessages(loadedMessages);
+          setContactMethods(methods);
+
+          void getBlockStatus(context.matchId, context.partnerId ?? null).then((blockState) => {
+            if (!mounted) return;
+            setIsBlocked(blockState.isBlocked);
+          });
+        }
+
+        setLoading(false);
+
+        setActiveLocalChatMatchId(context.matchId);
+        void markLocalNotificationsReadForCurrentUserByKind('chat_message');
+
+        void chatApi.markAsRead(context.matchId).then(() => {
+          window.dispatchEvent(new Event('chat-unread-updated'));
         });
-      });
+
+        void subscribeMessages(context.matchId, (newMessage) => {
+          setMessages((prev) => {
+            if (prev.some((item) => item.id === newMessage.id)) {
+              return prev;
+            }
+            return [...prev, newMessage];
+          });
+        }).then((nextUnsubscribe) => {
+          if (!mounted) {
+            nextUnsubscribe();
+            return;
+          }
+
+          unsubscribe = nextUnsubscribe;
+        });
+      } catch {
+        if (!mounted) return;
+        setError('加载聊天失败，请稍后重试');
+        setLoading(false);
+      }
     };
 
-    run();
+    void run();
 
     return () => {
       mounted = false;
+      setActiveLocalChatMatchId(null);
       unsubscribe();
     };
-  }, []);
+  }, [preloadedContext, preloadedData]);
+
+  useEffect(() => {
+    if (loading || !messagesEndRef.current) {
+      return;
+    }
+
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'auto', block: 'end' });
+      });
+    });
+  }, [loading, messages.length]);
 
   const handleSendMessage = async () => {
     if (!inputValue.trim() || !chatContext) return;
@@ -105,6 +171,18 @@ const ChatRoomPage: React.FC = () => {
     if (!result.success || !result.message) {
       setError(result.error || '发送失败，请稍后重试');
       return;
+    }
+
+    if (chatContext.partnerId) {
+      void addLocalNotificationForUser(chatContext.partnerId, {
+        kind: 'chat_message',
+        title: '新消息',
+        content: inputValue.trim().slice(0, 32),
+        linkPath: '/chat-entry',
+        channel: 'in_app',
+        isRead: false,
+        createdAt: new Date().toISOString(),
+      });
     }
 
     setMessages((prev) => [...prev, result.message as ChatMessageItem]);
@@ -279,7 +357,7 @@ const ChatRoomPage: React.FC = () => {
       </div>
 
       {/* Chat Messages Area */}
-      <div className="mx-auto w-[92%] max-w-7xl space-y-6 pb-40 md:pb-44">
+      <div className="mx-auto w-[92%] max-w-7xl space-y-6 pb-56 md:pb-64">
         <div className="flex justify-center">
           <div className="bg-white/50 backdrop-blur-md border border-white/40 px-6 py-2.5 rounded-full text-[10px] font-black text-on-surface-variant/40 tracking-[0.2em] shadow-sm uppercase">
             缘分始于 2 天前
@@ -314,13 +392,16 @@ const ChatRoomPage: React.FC = () => {
               </div>
             </div>
           ))}
+          <div ref={messagesEndRef} style={{ scrollMarginBottom: '240px' }} />
         </div>
+
+        <div className="h-40 md:h-52" aria-hidden="true" />
 
         {error && <div className="text-red-500 text-sm text-center">{error}</div>}
         {hint && <div className="text-green-600 text-sm text-center">{hint}</div>}
       </div>
 
-      <div className="fixed bottom-[88px] md:bottom-[96px] left-0 right-0 z-[45] px-4 md:px-0">
+      <div className="fixed bottom-[104px] md:bottom-[120px] left-0 right-0 z-[45] px-4 md:px-0">
         <div className="mx-auto w-[92%] max-w-7xl">
           <div className="glass-card rounded-[999px] px-4 py-3 md:px-5 md:py-4 shadow-md border-white/60">
             <div className="flex flex-wrap gap-2">
@@ -361,7 +442,7 @@ const ChatRoomPage: React.FC = () => {
       </div>
 
       {/* Floating Input Area */}
-      <div className="fixed bottom-0 left-0 right-0 px-4 md:px-0 pb-6 pt-4 bg-gradient-to-t from-[#fdf9f3] via-[#fdf9f3]/90 to-transparent z-50">
+      <div className="fixed bottom-0 left-0 right-0 px-4 md:px-0 pb-8 pt-4 bg-gradient-to-t from-[#fdf9f3] via-[#fdf9f3]/90 to-transparent z-50">
         <div className="mx-auto w-[92%] max-w-7xl">
           <div className="glass-card rounded-[2.5rem] p-2 shadow-lg flex items-center gap-2 border-white/70">
             <div className="flex items-center gap-1 pl-2">
