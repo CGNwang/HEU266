@@ -2,6 +2,7 @@ import { Suspense, lazy, useEffect, useState } from 'react';
 import type { ComponentType, LazyExoticComponent } from 'react';
 import { createBrowserRouter, Navigate, Outlet, useLocation } from 'react-router-dom';
 import { Layout } from '@/components/layout';
+import { useAuthStore } from '@/store';
 import { getCurrentUser } from '@/services/authService';
 
 const HomePage = lazy(() => import('@/components/pages/HomePage'));
@@ -46,10 +47,17 @@ const ScrollToTopOnNavigate = () => {
 
 const RequireAuth = () => {
   const location = useLocation();
-  const [checking, setChecking] = useState(true);
-  const [isAuthed, setIsAuthed] = useState(false);
+  const isStoreAuthed = useAuthStore((state) => state.isAuthenticated);
+  const [checking, setChecking] = useState(!isStoreAuthed);
+  const [isAuthed, setIsAuthed] = useState(isStoreAuthed);
 
   useEffect(() => {
+    if (isStoreAuthed) {
+      setIsAuthed(true);
+      setChecking(false);
+      return;
+    }
+
     let active = true;
 
     const verifyAuth = async () => {
@@ -66,7 +74,7 @@ const RequireAuth = () => {
     return () => {
       active = false;
     };
-  }, []);
+  }, [isStoreAuthed]);
 
   if (checking) {
     return <div className="min-h-screen flex items-center justify-center text-on-surface-variant">认证中...</div>;

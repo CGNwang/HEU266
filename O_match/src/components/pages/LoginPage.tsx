@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { login } from '@/services/authService';
-import { hasSubmittedQuestionnaire, loadQuestionnaire } from '@/services/questionnaireService';
+import { getQuestionnaireSnapshot, hasSubmittedQuestionnaire, loadQuestionnaire } from '@/services/questionnaireService';
 import { calculateModuleProgress } from '@/utils/questionnaireProgress';
 
 const HRBEU_EMAIL_SUFFIX = '@hrbeu.edu.cn';
@@ -26,8 +26,8 @@ const LoginPage: React.FC = () => {
     return prefix ? `${prefix}${HRBEU_EMAIL_SUFFIX}` : '';
   };
 
-  const resolvePostLoginPath = async () => {
-    const questionnaire = await loadQuestionnaire();
+  const resolvePostLoginPath = () => {
+    const questionnaire = getQuestionnaireSnapshot();
 
     if (hasSubmittedQuestionnaire()) {
       return '/waiting';
@@ -61,7 +61,10 @@ const LoginPage: React.FC = () => {
       const result = await login({ username, email, password });
 
       if (result.success) {
-        navigate(await resolvePostLoginPath(), { replace: true });
+        // Do not block navigation on remote questionnaire hydration.
+        const targetPath = resolvePostLoginPath();
+        void loadQuestionnaire();
+        navigate(targetPath, { replace: true });
       } else {
         setError(result.message || '登录失败');
       }
