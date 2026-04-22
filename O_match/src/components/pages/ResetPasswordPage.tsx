@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { resetPassword } from '@/services/authService';
+import { PASSWORD_RULE_MESSAGE, isValidPassword } from '@/utils/password';
 
 const ResetPasswordPage: React.FC = () => {
   const navigate = useNavigate();
@@ -27,8 +28,8 @@ const ResetPasswordPage: React.FC = () => {
       return;
     }
 
-    if (password.length < 6) {
-      setError('密码长度至少为6位');
+    if (!isValidPassword(password)) {
+      setError(PASSWORD_RULE_MESSAGE);
       return;
     }
 
@@ -77,7 +78,7 @@ const ResetPasswordPage: React.FC = () => {
               <div className="relative group">
                 <input
                   className="w-full bg-surface-container-low border-none rounded-2xl py-4 px-6 pr-20 text-on-surface placeholder:text-outline/40 focus:ring-0 focus:bg-surface-container-lowest transition-all duration-300 ghost-border"
-                  placeholder="••••••••"
+                  placeholder="密码"
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -92,6 +93,7 @@ const ResetPasswordPage: React.FC = () => {
                   <span className="material-symbols-outlined text-[20px] leading-none">{showPassword ? 'visibility' : 'visibility_off'}</span>
                 </button>
               </div>
+              <p className="text-xs text-on-surface-variant ml-4">{PASSWORD_RULE_MESSAGE}</p>
             </div>
 
             <div className="space-y-2">
@@ -99,7 +101,7 @@ const ResetPasswordPage: React.FC = () => {
               <div className="relative group">
                 <input
                   className="w-full bg-surface-container-low border-none rounded-2xl py-4 px-6 pr-20 text-on-surface placeholder:text-outline/40 focus:ring-0 focus:bg-surface-container-lowest transition-all duration-300 ghost-border"
-                  placeholder="••••••••"
+                  placeholder="确认密码"
                   type={showConfirmPassword ? 'text' : 'password'}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
@@ -129,9 +131,6 @@ const ResetPasswordPage: React.FC = () => {
           </form>
 
           <div className="pt-8 border-t border-orange-100/30 w-full mt-10">
-            <p className="text-sm font-medium text-on-surface-variant">
-              记起密码了？<Link to="/login" className="text-secondary font-bold hover:opacity-80 transition-opacity ml-1">返回登录</Link>
-            </p>
           </div>
         </div>
       </main>

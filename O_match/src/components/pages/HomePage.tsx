@@ -1,7 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useAuthStore } from '@/store/auth';
 
 const HomePage: React.FC = () => {
+  const isLoggedIn = useAuthStore((state) => Boolean(state.token && state.user));
+
   return (
     <>
       {/* Hero Background Gradient - Extends to top of page */}
@@ -144,7 +147,7 @@ const HomePage: React.FC = () => {
         {/* CTA Button */}
         <div className="fixed bottom-24 md:bottom-10 left-1/2 -translate-x-1/2 z-[100] w-[90%] max-w-sm flex justify-center pointer-events-none">
           <Link
-            to="/login"
+            to={isLoggedIn ? '/questionnaire/1' : '/login'}
             className="pointer-events-auto orange-glow text-white w-full py-5 rounded-full flex items-center justify-center gap-3 font-extrabold text-lg md:text-xl deep-glow-shadow transition-all duration-300 hover:scale-105 active:scale-95 group hover:-translate-y-1"
           >
             <span className="material-symbols-outlined text-2xl md:text-3xl group-hover:scale-110 transition-transform" style={{ fontVariationSettings: '"FILL" 1' }}>
@@ -153,7 +156,13 @@ const HomePage: React.FC = () => {
             <span>开启我的灵魂盲盒</span>
           </Link>
         </div>
-        <footer className="mt-8 text-center pb-32 md:pb-12">
+        <footer className="mt-8 text-center pb-72 md:pb-64">
+          <Link
+            to="/feedback"
+            className="inline-block text-orange-600 hover:text-orange-700 font-medium text-xs md:text-sm mb-4 transition-colors"
+          >
+            联系我们
+          </Link>
           <p className="text-on-surface-variant/40 text-[10px] md:text-sm">© 2024 🍊意配 | HEU 校园专属社交实验</p>
         </footer>
       </div>
